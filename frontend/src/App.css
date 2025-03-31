@@ -1,38 +1,91 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+/* === General Layout === */
+.login-container {
   min-height: 100vh;
+  padding-top: 80px;   /* space for fixed navbar */
+  padding-bottom: 60px; /* space for fixed footer */
+  background-color: #f2f2f2;
+}
+
+.login-box {
+  width: 500px;
+  padding: 30px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* === Show/Hide Password Toggle === */
+.show-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #007bff;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* === Sign In Button === */
+.login-button {
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  background-color: #003366;
+  border: none;
+}
+
+.login-button:hover {
+  background-color: #002244;
+}
+
+/* === Top Navbar === */
+.navbar-search {
+  flex-grow: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+.navbar-search input {
+  width: 60%;
+}
+
+.nav-signin-button {
+  background-color: #003366;
+  border: none;
+}
+
+.nav-signin-button:hover {
+  background-color: #002244;
+}
+
+.cart-icon {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* === Footer Bar === */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: black;
   color: white;
+  padding: 10px 20px;
+  font-size: 12px;
 }
 
-.App-link {
-  color: #61dafb;
+.bottom-bar a {
+  color: white;
+  margin-left: 15px;
+  text-decoration: none;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.bottom-bar a:hover {
+  text-decoration: underline;
+}
+
+/* === Login Footer Links === */
+.login-links {
+  font-size: 12px;
 }
