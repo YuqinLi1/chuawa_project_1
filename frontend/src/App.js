@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './authorization/Login';
 import SignUp from './authorization/SignUp';
 import PasswordUpdate from './authorization/PasswordUpdate';
-import PasswordReset from './pages/PasswordResetPage';
+import PasswordReset from './authorization/PasswordReset';
 
 function App() {
   return (
