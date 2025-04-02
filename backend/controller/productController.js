@@ -5,7 +5,8 @@ const mongoose = require("mongoose");
 
 //create product
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, stock, category, image1 } = req?.body;
+  const { name, price, description, stock, category } = req?.body;
+  const image1 = req.file ? req.file.path : req.body.image1;
   try {
     // create product
     const newProduct = await Product.create({
@@ -69,16 +70,17 @@ const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req?.params;
   try {
     const user = req?.user;
-    const updateProd = await Product.findByIdAndUpdate(
-      id,
-      {
-        ...req.body,
-        user: user?._id,
-      },
-      { new: true }
-    );
-
-    const updatedProd = await Product.findById(id).populate("user");
+    const updateData = {
+      ...req.body,
+      user: user ? user._id : undefined,
+    };
+    // if file exists
+    if (req.file) {
+      updateData.image1 = req.file.path;
+    }
+    const updatedProd = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+    }).populate("user");
     res.status(200).json(updatedProd);
   } catch (error) {
     res.status(401).json({
