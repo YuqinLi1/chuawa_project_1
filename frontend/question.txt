@@ -1,0 +1,38 @@
+create new webpages name products, details, createProduct, editProduct and errorPage.
+Create a new page 
+products page: this page display all products' brief info. a product contains following elements:
+1. product name: limit 100 words
+2. Product description: limit 500 words
+3. category: four values - electronic/daily/grocery/other
+4. price
+5. in stock quality
+6. image url
+Create a container name product-container, each product-container has an image of product, product name, price, add button and edit button
+The css style of product-container: first is image with take 70% of the space, then product name is below the image, then two button on same line with different color 
+Then create a page-container. This is differnt from login-page. The container will take all the space of webpage. Firstly it has Products word on the top left. Then 
+on the next line list number of products-container. each row has at least 4 iteams and at least 2 rows on one page. Should have page number on the right bottom to navigate to next page and next products
+If the login in page received 200, then navigate to products page
+add a select box ln the top right with option: sorted by date, sorted by price-L to H, sorted by price-H to L
+
+given the product controller in backend:
+
+
+
+If the image is clicked, should navigate to details page. The details page only show one item. It consists of image, name, description, price. 
+on the top left is title "product details". The detail container is below the title and fill the page. The picture takes left side of detail container(50% width, 100% height)
+On the right, from top to bottom is category, name, (same line: price, a waring box with "out of stock"(this only appear when stock is 0)), description, (same line: add to cart button in blue, edit button in grey)
+
+next is createProduct page. The title "Create Product" is on the top middle. Then follwing elements: product name(100 words limit, box); product description(500 words limit, box);
+(same line: category, select box - electronic/daily/grocery/other options ; price, box). (same line: in stock quality, box; add image link, box; preview button, in color blue); image preview (if a valid url is placed on
+above add image link and preview button is clicked, the image should apprear here). Finally a button with "add product"  
+
+next is editProduct page. if the edit on product container is clicked, will navigate to edit page with path /product/id/edit. similar css layout as createProduct page with following differences：
+1. "Create product" change to "update product"
+2. remove "add image link" box, preview button and image preview part
+3. move "in stock quality box" to the same line as "category" select option and "price" box
+4. change "add product" button to "edit product" and move to left, add a new button "delete product" to right
+
+finally we have an error page. The layout like this:
+			(astonished symbol inside a circle)
+			Oops, something went wrong!(title)
+			(a go home button, color is blue. will navigate to product page if clicked)
