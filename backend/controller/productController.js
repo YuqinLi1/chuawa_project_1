@@ -26,13 +26,20 @@ const createProduct = asyncHandler(async (req, res) => {
   }
 });
 
-//fetch all products
+//fetch all products /products?sortField=price&sortOrder=desc
 const fetchAllProducts = asyncHandler(async (req, res) => {
   try {
-    const allProducts = await User.find({})
-      .populate("user")
-      .sort({ createdAt: -1 });
+    const sortField = req.query.sortField;
+    const sortOrder = req.query.sortOrder;
+    let sortOption = {};
+    if (sortField) {
+      // check sorting order
+      sortOption[sortField] = sortOrder === "asc" ? 1 : -1;
+    }
+
+    const allProducts = await Product.find().sort(sortOption);
     res.status(200).json({
+      success: true,
       allProducts,
     });
   } catch (error) {

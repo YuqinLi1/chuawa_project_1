@@ -16,7 +16,7 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
 
-    Price: {
+    price: {
       type: Number,
     },
 
@@ -28,6 +28,8 @@ const productSchema = new mongoose.Schema(
     image1: {
       type: String,
     },
+
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   {
     toJSON: { virtuals: true },
