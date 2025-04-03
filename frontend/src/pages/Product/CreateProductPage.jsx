@@ -111,7 +111,7 @@ function CreateProductPage({
                 onChange={(e) => setName(e.target.value)}
               />
             </Form.Field>
-            /** product description */
+            {/* product description  */}
             <Form.Field>
               <label>Product Description</label>
               <TextArea

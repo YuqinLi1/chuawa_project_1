@@ -6,10 +6,10 @@ const dbconnection = require("./config/DBconnection.js");
 const cookieparser = require("cookie-parser");
 const cors = require("cors");
 
-const authRoutes = require("./routes/authRoutes");
-const productRoutes = require("./routes/productRoutes");
-const cartRoutes = require("./routes/cartRoutes");
-const errorMiddleware = require("./middlewares/errorMiddleware");
+const authRoutes = require("./routes/authRoutes.js");
+const productRoutes = require("./routes/productRoutes.js");
+const cartRoutes = require("./routes/cartRoutes.js");
+const errorMiddleware = require("./middleware/errorMiddleware");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,3 +26,7 @@ app.use("/api/cart", cartRoutes);
 app.use(errorMiddleware);
 
 dbconnection();
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

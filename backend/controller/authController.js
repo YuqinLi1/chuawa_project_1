@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
-const User = require("../../model/UserModel.js");
+const User = require("../models/userModel.js");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 
@@ -98,39 +98,6 @@ const userLogin = asyncHandler(async (req, res) => {
   }
 });
 
-//user details
-const userDetails = asyncHandler(async (req, res) => {
-  const id = req?.user?._id;
-  try {
-    const user = await User.findById(id).select("-password").populate("saved");
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
-//fetch all users
-const fetchAllUsers = asyncHandler(async (req, res) => {
-  try {
-    const user = await User.find();
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
 //user change password controller/logic
 const userPasswordUpdate = asyncHandler(async (req, res) => {
   const { password } = req?.body;
@@ -156,30 +123,6 @@ const userPasswordUpdate = asyncHandler(async (req, res) => {
         updatedUser,
       });
     }
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
-//update user field logic
-const updateUserField = asyncHandler(async (req, res) => {
-  const id = req?.user?._id;
-
-  try {
-    const user = await User.findByIdAndUpdate(id, { ...req?.body }).select(
-      "-pasword"
-    );
-
-    if (!user) throw new Error("No user Found!");
-
-    const updatedUser = await User.findById(id)
-      .populate("saved")
-      .select("-password");
-
-    res.status(200).json(updatedUser);
   } catch (error) {
     res.status(401).json({
       success: false,
@@ -259,10 +202,7 @@ const unSaveProduct = asyncHandler(async (req, res) => {
 module.exports = {
   registerUser,
   userLogin,
-  userDetails,
-  fetchAllUsers,
   userPasswordUpdate,
-  updateUserField,
   saveProduct,
   unSaveProduct,
 };

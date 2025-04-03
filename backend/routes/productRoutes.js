@@ -1,31 +1,31 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/multer");
-const { verifyToken, checkAdmin } = require("../middlewares/authMiddleware");
-const productController = require("../controllers/productController");
+const { userAuth, checkAdmin } = require("../middleware/authMiddleware");
+const productController = require("../controller/productController");
 
 // public: get products
 router.get("/", productController.fetchAllProducts);
-router.get("/:productId", productController.fetchSinglePro);
+router.get("/:productId", productController.fetchSingleProd);
 
 // admin only: create, update, delete
 router.post(
   "/",
-  verifyToken,
+  userAuth,
   checkAdmin,
   upload.single("image"),
   productController.createProduct
 );
 router.put(
   "/:productId",
-  verifyToken,
+  userAuth,
   checkAdmin,
   upload.single("image"),
   productController.updateProduct
 );
 router.delete(
   "/:productId",
-  verifyToken,
+  userAuth,
   checkAdmin,
   productController.deleteProduct
 );

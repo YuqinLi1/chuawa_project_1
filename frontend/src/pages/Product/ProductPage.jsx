@@ -8,6 +8,7 @@ import {
   Card,
   Image,
   Header,
+  Dropdown,
   Loader,
   Message,
 } from "semantic-ui-react";
@@ -78,7 +79,7 @@ function ProductPage() {
     }
   };
 
-  const handleAddtoCart = async (product) => {
+  const handleAddToCart = async (product) => {
     try {
       const res = await api.post("/cart", {
         productId: product._id,
@@ -93,7 +94,6 @@ function ProductPage() {
       );
 
       setTotalPrice(newTotal);
-      setCartVisible(true);
     } catch (error) {
       console.error("Error adding product to cart:", error);
     }
@@ -148,81 +148,81 @@ function ProductPage() {
     } catch (error) {
       console.error("Error applying promotion:", error);
     }
-  };
 
-  return (
-    <div>
-      <HeaderBar
-        cartItems={cartItems}
-        totalPrice={totalPrice}
-        promoCode={promoCode}
-        setPromoCode={setPromoCode}
-        handleApplyPromo={handleApplyPromo}
-        handleRemoveItem={handleRemoveItem}
-        handleUpdateQuantity={handleUpdateQuantity}
-      />
+    return (
+      <div>
+        <HeaderBar
+          cartItems={cartItems}
+          totalPrice={totalPrice}
+          promoCode={promoCode}
+          setPromoCode={setPromoCode}
+          handleApplyPromo={handleApplyPromo}
+          handleRemoveItem={handleRemoveItem}
+          handleUpdateQuantity={handleUpdateQuantity}
+        />
 
-      <Segment basic>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "1rem",
-          }}
-        >
-          <Header as="h2" style={{ marginRight: "1rem" }}>
-            Products
-          </Header>
-
-          <Dropdown
-            selection
-            options={sortOptions}
-            value={sortValue}
-            onChange={(e, { value }) => setSortValue(value)}
-            style={{ marginRight: "1rem" }}
-          />
-
-          <Button
-            color="green"
-            onClick={() => navigate("/create-product")}
-            style={{ marginRight: "1rem" }}
+        <Segment basic>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
           >
-            <Icon name="plus" />
-            Add Product
-          </Button>
-        </div>
+            <Header as="h2" style={{ marginRight: "1rem" }}>
+              Products
+            </Header>
 
-        {loading ? (
-          <Loader active inline="centered">
-            Loading Products...
-          </Loader>
-        ) : products.length === 0 ? (
-          <Message info>No products found.</Message>
-        ) : (
-          <Grid columns={4} stackable>
-            {products.map((p) => (
-              <Grid.Column key={p._id}>
-                <Card>
-                  <Image src={p.image1} wrapped ui={false} />
-                  <Card.Content>
-                    <Card.Header>{p.name}</Card.Header>
-                    <Card.Meta>${p.price}</Card.Meta>
-                    <Card.Description>{p.description}</Card.Description>
-                  </Card.Content>
-                  <Card.Content extra>
-                    <Button primary onClick={() => handleAddToCart(p)}>
-                      Add to Cart
-                    </Button>
-                  </Card.Content>
-                </Card>
-              </Grid.Column>
-            ))}
-          </Grid>
-        )}
-      </Segment>
-      <Footer />
-    </div>
-  );
+            <Dropdown
+              selection
+              options={sortOptions}
+              value={sortValue}
+              onChange={(e, { value }) => setSortValue(value)}
+              style={{ marginRight: "1rem" }}
+            />
+
+            <Button
+              color="green"
+              onClick={() => navigate("/create-product")}
+              style={{ marginRight: "1rem" }}
+            >
+              <Icon name="plus" />
+              Add Product
+            </Button>
+          </div>
+
+          {loading ? (
+            <Loader active inline="centered">
+              Loading Products...
+            </Loader>
+          ) : products.length === 0 ? (
+            <Message info>No products found.</Message>
+          ) : (
+            <Grid columns={4} stackable>
+              {products.map((p) => (
+                <Grid.Column key={p._id}>
+                  <Card>
+                    <Image src={p.image1} wrapped ui={false} />
+                    <Card.Content>
+                      <Card.Header>{p.name}</Card.Header>
+                      <Card.Meta>${p.price}</Card.Meta>
+                      <Card.Description>{p.description}</Card.Description>
+                    </Card.Content>
+                    <Card.Content extra>
+                      <Button primary onClick={() => handleAddToCart(p)}>
+                        Add to Cart
+                      </Button>
+                    </Card.Content>
+                  </Card>
+                </Grid.Column>
+              ))}
+            </Grid>
+          )}
+        </Segment>
+        <Footer />
+      </div>
+    );
+  };
 }
 
 export default ProductPage;

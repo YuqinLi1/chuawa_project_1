@@ -63,10 +63,46 @@ function ProductDetailPage({
       setCartMessage("");
     }
   };
-}
 
-// loading
-if (loading) {
+  // loading
+  if (loading) {
+    return (
+      <div>
+        <HeaderBar
+          cartItems={cartItems}
+          totalPrice={totalPrice}
+          promoCode={promoCode}
+          setPromoCode={setPromoCode}
+          handleApplyPromo={handleApplyPromo}
+          handleRemoveItem={handleRemoveItem}
+          handleUpdateQuantity={handleUpdateQuantity}
+        />
+        <Loader active inline="centered">
+          Loading product...
+        </Loader>
+      </div>
+    );
+  }
+
+  // not found product
+
+  if (!product) {
+    return (
+      <div>
+        <HeaderBar
+          cartItems={cartItems}
+          totalPrice={totalPrice}
+          promoCode={promoCode}
+          setPromoCode={setPromoCode}
+          handleApplyPromo={handleApplyPromo}
+          handleRemoveItem={handleRemoveItem}
+          handleUpdateQuantity={handleUpdateQuantity}
+        />
+        <Message negative>No product found.</Message>
+      </div>
+    );
+  }
+
   return (
     <div>
       <HeaderBar
@@ -78,78 +114,40 @@ if (loading) {
         handleRemoveItem={handleRemoveItem}
         handleUpdateQuantity={handleUpdateQuantity}
       />
-      <Loader active inline="centered">
-        Loading product...
-      </Loader>
+
+      <Segment basic>
+        <Header as="h2">Product Detail</Header>
+        <Grid stackable>
+          <Grid.Row>
+            <Grid.Column width={8}>
+              <Image src={product.image1} fluid />
+            </Grid.Column>
+            <Grid.Column width={8}>
+              <Header as="h1">{product.name}</Header>
+              <Header as="h3">${product.price}</Header>
+              {product.stock === 0 ? (
+                <Label color="red">Out of Stock</Label>
+              ) : (
+                <Label color="green">In Stock</Label>
+              )}
+              <p style={{ marginTop: "1rem" }}>{product.description}</p>
+              <div style={{ marginTop: "1.5rem" }}>
+                <Button
+                  color="blue"
+                  onClick={handleAddCartClick}
+                  disabled={product.stock === 0}
+                >
+                  Add to Cart
+                </Button>
+                <Button style={{ marginLeft: "1rem" }}>Edit</Button>
+              </div>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </Segment>
+      <Footer />
     </div>
   );
 }
-
-// not found product
-
-if (!product) {
-  return (
-    <div>
-      <HeaderBar
-        cartItems={cartItems}
-        totalPrice={totalPrice}
-        promoCode={promoCode}
-        setPromoCode={setPromoCode}
-        handleApplyPromo={handleApplyPromo}
-        handleRemoveItem={handleRemoveItem}
-        handleUpdateQuantity={handleUpdateQuantity}
-      />
-      <Message negative>No product found.</Message>
-    </div>
-  );
-}
-
-return (
-  <div>
-    <HeaderBar
-      cartItems={cartItems}
-      totalPrice={totalPrice}
-      promoCode={promoCode}
-      setPromoCode={setPromoCode}
-      handleApplyPromo={handleApplyPromo}
-      handleRemoveItem={handleRemoveItem}
-      handleUpdateQuantity={handleUpdateQuantity}
-    />
-
-    <Segment basic>
-      <Header as="h2">Product Detail</Header>
-      <Grid stackable>
-        <Grid.Row>
-          <Grid.Column width={8}>
-            <Image src={product.image1} fluid />
-          </Grid.Column>
-          <Grid.Column width={8}>
-            <Header as="h1">{product.name}</Header>
-            <Header as="h3">${product.price}</Header>
-            {product.stock === 0 ? (
-              <Label color="red">Out of Stock</Label>
-            ) : (
-              <Label color="green">In Stock</Label>
-            )}
-            <p style={{ marginTop: "1rem" }}>{product.description}</p>
-            <div style={{ marginTop: "1.5rem" }}>
-              <Button
-                color="blue"
-                onClick={handleAddCartClick}
-                disabled={product.stock === 0}
-              >
-                Add to Cart
-              </Button>
-              <Button style={{ marginLeft: "1rem" }} onClick={handleEdit}>
-                Edit
-              </Button>
-            </div>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
-    </Segment>
-    <Footer />
-  </div>
-);
 
 export default ProductDetailPage;

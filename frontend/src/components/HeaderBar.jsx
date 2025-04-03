@@ -14,6 +14,7 @@ const HeaderBar = ({
   handleUpdateQuantity,
 }) => {
   const [cartVisible, setCartVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = async () => {
