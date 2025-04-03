@@ -30,15 +30,24 @@ const createProduct = asyncHandler(async (req, res) => {
 //fetch all products /products?sortField=price&sortOrder=desc
 const fetchAllProducts = asyncHandler(async (req, res) => {
   try {
-    const sortField = req.query.sortField;
-    const sortOrder = req.query.sortOrder;
+    const { sortField, sortOrder, search } = req.query;
     let sortOption = {};
     if (sortField) {
-      // check sorting order
-      sortOption[sortField] = sortOrder === "asc" ? 1 : -1;
+      if (sortField === "lastAdded") {
+        // time order
+        sortOption.createdAt = -1;
+      } else {
+        // asc or dec order
+        sortOption[sortField] = sortOrder === "asc" ? 1 : -1;
+      }
     }
 
-    const allProducts = await Product.find().sort(sortOption);
+    let query = {};
+    if (search) {
+      query.name = { $regex: search, $options: "i" }; // ignoring case
+    }
+
+    const allProducts = await Product.find(query).sort(sortOption);
     res.status(200).json({
       success: true,
       allProducts,

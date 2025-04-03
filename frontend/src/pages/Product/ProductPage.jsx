@@ -11,14 +11,16 @@ import {
   Loader,
   Message,
 } from "semantic-ui-react";
+import { useNavigate } from "react-router-dom";
 import useWindowSize from "../../hooks/useWindowSize.jsx";
 import api from "../../services/api.js";
+import HeaderBar from "../../components/HeaderBar";
+import Footer from "../../components/Footer";
 
 function ProductPage() {
   const [products, setProducts] = useState([]);
 
   //cart state and content
-  const [cartVisible, setCartVisible] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [discountRate, setDiscountRate] = useState(0);
@@ -26,29 +28,55 @@ function ProductPage() {
 
   const [loading, setLoading] = useState(false);
 
+  // sort and search
+  const [sortField, setSortField] = useState("price");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortValue, setSortValue] = useState("lastAdded");
+
   const { width } = useWindowSize();
   const isMobile = width < 600;
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/products", {
-          params: {
-            sortField: "price",
-            sortOrder: "asc",
-          },
-        });
-        setProducts(response.data.products);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const navigate = useNavigate();
 
+  const sortOptions = [
+    { key: "lastAdded", text: "Last Added", value: "lastAdded" },
+    { key: "priceAsc", text: "Price: Low to High", value: "priceAsc" },
+    { key: "priceDesc", text: "Price: High to Low", value: "priceDesc" },
+  ];
+
+  useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [sortField, sortOrder]);
+
+  useEffect(() => {
+    if (sortValue === "lastAdded") {
+      setSortField("lastAdded");
+      setSortOrder("");
+    } else if (sortValue === "asc") {
+      setSortField("price");
+      setSortOrder("asc");
+    } else if (sortValue === "desc") {
+      setSortField("price");
+      setSortOrder("desc");
+    }
+  }, [sortValue]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get("/products", {
+        params: {
+          sortField,
+          sortOrder,
+        },
+      });
+      setProducts(response.data.allProducts || []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddtoCart = async (product) => {
     try {
@@ -116,150 +144,84 @@ function ProductPage() {
         (acc, item) => acc + item.product.price * item.quantity,
         0
       );
-      setTotalPrice(currentTotal * (1 - discountRate));
+      setTotalPrice(currentTotal * (1 - discountRateFromRes));
     } catch (error) {
       console.error("Error applying promotion:", error);
     }
   };
 
   return (
-    <Sidebar.Pushable as={Segment} style={{ minHeight: "100vh" }}>
-      /* cart sidebar */
-      <Sidebar
-        as={Segment}
-        animation="overlay"
-        direction="right"
-        visible={cartVisible}
-        style={{
-          width: isMobile ? "100%" : "350px",
-          padding: "1rem",
-          overflowY: "auto",
-        }}
-      >
-        <Header as="h3">
-          <Icon name="shopping cart" /> Cart ({cartItems.length})
-        </Header>
-        {cartItems.length === 0 ? (
-          <Message info>
-            <Message.Header>Your cart is empty</Message.Header>
-            <p>Add products to see them here.</p>
-          </Message>
-        ) : (
-          cartItems.map((item) => (
-            <div key={item._id} style={{ marginBottom: "1rem" }}>
-              <strong>{item.product.name}</strong> - $
-              {item.product.price.toFixed(2)}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginTop: "0.5rem",
-                }}
-              >
-                <Input
-                  type="number"
-                  value={item.quantity}
-                  onChange={
-                    (e) =>
-                      handleUpdateQuantity(
-                        item._id,
-                        Number(e.target.value)
-                      ) /* transfer the type */
-                  }
-                  style={{ width: "80px" }}
-                />
-                <Button
-                  icon="trash"
-                  size="tiny"
-                  color="red"
-                  onClick={() => handleRemoveItem(item._id)}
-                />
-              </div>
-            </div>
-          ))
-        )}
-        <div style={{ marginTop: "1rem" }}>
-          <strong>Total: ${totalPrice.toFixed(2)}</strong>
-        </div>
-        <div style={{ marginTop: "1rem" }}>
-          <Input
-            placeholder="Enter promo code"
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
+    <div>
+      <HeaderBar
+        cartItems={cartItems}
+        totalPrice={totalPrice}
+        promoCode={promoCode}
+        setPromoCode={setPromoCode}
+        handleApplyPromo={handleApplyPromo}
+        handleRemoveItem={handleRemoveItem}
+        handleUpdateQuantity={handleUpdateQuantity}
+      />
+
+      <Segment basic>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <Header as="h2" style={{ marginRight: "1rem" }}>
+            Products
+          </Header>
+
+          <Dropdown
+            selection
+            options={sortOptions}
+            value={sortValue}
+            onChange={(e, { value }) => setSortValue(value)}
+            style={{ marginRight: "1rem" }}
           />
+
           <Button
-            color="blue"
-            fluid
-            style={{ marginTop: "0.5rem" }}
-            onClick={handleApplyPromo}
+            color="green"
+            onClick={() => navigate("/create-product")}
+            style={{ marginRight: "1rem" }}
           >
-            Apply Promo
+            <Icon name="plus" />
+            Add Product
           </Button>
         </div>
-        <Button color="blue" fluid style={{ marginTop: "1rem" }}>
-          Checkout
-        </Button>
-        <Button
-          basic
-          fluid
-          style={{ marginTop: "0.5rem" }}
-          onClick={() => setCartVisible(false)}
-        >
-          Close
-        </Button>
-      </Sidebar>
-      /* Product List */
-      <Sidebar.Pusher dimmed={cartVisible}>
-        <Segment basic>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Header as="h2">My Store</Header>
-            <div>
-              <Button icon="user" content="Sign In" />
-              <Button
-                icon="shopping cart"
-                onClick={() => setCartVisible(true)}
-                style={{ marginLeft: "1rem" }}
-              >
-                Cart ({cartItems.length})
-              </Button>
-            </div>
-          </div>
 
-          {loadingProducts ? (
-            <Loader active inline="centered">
-              Loading Products...
-            </Loader>
-          ) : (
-            <Grid columns={4} stackable>
-              {products.map((p) => (
-                <Grid.Column key={p._id}>
-                  <Card>
-                    <Image src={p.imageUrl} wrapped ui={false} />
-                    <Card.Content>
-                      <Card.Header>{p.name}</Card.Header>
-                      <Card.Meta>${p.price}</Card.Meta>
-                      <Card.Description>{p.description}</Card.Description>
-                    </Card.Content>
-                    <Card.Content extra>
-                      <Button primary onClick={() => handleAddToCart(p)}>
-                        Add to Cart
-                      </Button>
-                    </Card.Content>
-                  </Card>
-                </Grid.Column>
-              ))}
-            </Grid>
-          )}
-        </Segment>
-      </Sidebar.Pusher>
-    </Sidebar.Pushable>
+        {loading ? (
+          <Loader active inline="centered">
+            Loading Products...
+          </Loader>
+        ) : products.length === 0 ? (
+          <Message info>No products found.</Message>
+        ) : (
+          <Grid columns={4} stackable>
+            {products.map((p) => (
+              <Grid.Column key={p._id}>
+                <Card>
+                  <Image src={p.image1} wrapped ui={false} />
+                  <Card.Content>
+                    <Card.Header>{p.name}</Card.Header>
+                    <Card.Meta>${p.price}</Card.Meta>
+                    <Card.Description>{p.description}</Card.Description>
+                  </Card.Content>
+                  <Card.Content extra>
+                    <Button primary onClick={() => handleAddToCart(p)}>
+                      Add to Cart
+                    </Button>
+                  </Card.Content>
+                </Card>
+              </Grid.Column>
+            ))}
+          </Grid>
+        )}
+      </Segment>
+      <Footer />
+    </div>
   );
 }
 
