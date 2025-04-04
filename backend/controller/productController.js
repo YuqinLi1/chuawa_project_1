@@ -18,7 +18,7 @@ const createProduct = asyncHandler(async (req, res) => {
       image1,
     });
 
-    res.status(201).json(newProduct);
+    res.status(200).json(newProduct);
   } catch (error) {
     res.status(401).json({
       success: false,
@@ -65,7 +65,18 @@ const fetchSingleProd = asyncHandler(async (req, res) => {
   const { id } = req?.params;
   try {
     const singleProd = await Product.findById(id).populate("user");
-    res.status(200).json(singleProd);
+
+    //  check if product exists
+    if (!singleProd) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      singleProd,
+    });
   } catch (error) {
     res.status(401).json({
       success: false,

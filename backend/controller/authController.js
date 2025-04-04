@@ -38,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
     createdUser.password = undefined;
 
     res
-      .status(201)
+      .status(200)
       .cookie("token", token, { expires: new Date(Date.now() + date1) })
       .json({ success: true, token, createdUser });
   } catch (error) {
@@ -119,7 +119,7 @@ const userPasswordUpdate = asyncHandler(async (req, res) => {
 
       const updatedUser = await User.findById(id).select("-password");
 
-      res.status(201).json({
+      res.status(200).json({
         updatedUser,
       });
     }

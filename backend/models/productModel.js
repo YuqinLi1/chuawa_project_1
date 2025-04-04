@@ -22,7 +22,6 @@ const productSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      default: "Beauty",
     },
 
     image1: {

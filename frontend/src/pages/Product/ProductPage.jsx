@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Sidebar,
   Segment,
   Button,
   Icon,
@@ -20,6 +19,7 @@ import Footer from "../../components/Footer";
 
 function ProductPage() {
   const [products, setProducts] = useState([]);
+  const [error, setError] = useState(null);
 
   //cart state and content
   const [cartItems, setCartItems] = useState([]);
@@ -30,8 +30,6 @@ function ProductPage() {
   const [loading, setLoading] = useState(false);
 
   // sort and search
-  const [sortField, setSortField] = useState("price");
-  const [sortOrder, setSortOrder] = useState("asc");
   const [sortValue, setSortValue] = useState("lastAdded");
 
   const { width } = useWindowSize();
@@ -47,33 +45,47 @@ function ProductPage() {
 
   useEffect(() => {
     fetchProducts();
-  }, [sortField, sortOrder]);
-
-  useEffect(() => {
-    if (sortValue === "lastAdded") {
-      setSortField("lastAdded");
-      setSortOrder("");
-    } else if (sortValue === "asc") {
-      setSortField("price");
-      setSortOrder("asc");
-    } else if (sortValue === "desc") {
-      setSortField("price");
-      setSortOrder("desc");
-    }
   }, [sortValue]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
+
+      // Convert sortValue to API parameters
+      let sortField, sortOrder;
+      if (sortValue === "lastAdded") {
+        sortField = "lastAdded";
+        sortOrder = "";
+      } else if (sortValue === "priceAsc") {
+        sortField = "price";
+        sortOrder = "asc";
+      } else if (sortValue === "priceDesc") {
+        sortField = "price";
+        sortOrder = "desc";
+      }
+
       const response = await api.get("/products", {
         params: {
           sortField,
           sortOrder,
         },
       });
-      setProducts(response.data.allProducts || []);
+
+      // Check if valid products data
+      if (response.data && response.data.success) {
+        setProducts(response.data.allProducts || []);
+      } else {
+        setError("Failed to load products data");
+        setProducts([]);
+      }
     } catch (error) {
       console.error("Error fetching products:", error);
+      setError(
+        error.response?.data?.message ||
+          "An error occurred while fetching products"
+      );
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -85,17 +97,21 @@ function ProductPage() {
         productId: product._id,
         quantity: 1,
       });
-      setCartItems(res.data.items);
 
-      //calculate total prices
-      const newTotal = res.data.items.reduce(
-        (acc, item) => acc + item.product.price * item.quantity,
-        0
-      );
+      if (res.data && res.data.items) {
+        setCartItems(res.data.items);
 
-      setTotalPrice(newTotal);
+        //calculate total prices
+        const newTotal = res.data.items.reduce(
+          (acc, item) => acc + item.product.price * item.quantity,
+          0
+        );
+
+        setTotalPrice(newTotal);
+      }
     } catch (error) {
       console.error("Error adding product to cart:", error);
+      alert("Failed to add product to cart. Make sure you're logged in.");
     }
   };
 
@@ -132,7 +148,12 @@ function ProductPage() {
     }
   };
 
-  const handleApplyPromo = async (code) => {
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      alert("Please enter a promo code");
+      return;
+    }
+
     try {
       const res = await api.post("/cart/apply-promo", { code: promoCode });
 
@@ -147,38 +168,58 @@ function ProductPage() {
       setTotalPrice(currentTotal * (1 - discountRateFromRes));
     } catch (error) {
       console.error("Error applying promotion:", error);
+      alert(error.response?.data?.message || "Invalid promo code");
     }
+  };
 
-    return (
-      <div>
-        <HeaderBar
-          cartItems={cartItems}
-          totalPrice={totalPrice}
-          promoCode={promoCode}
-          setPromoCode={setPromoCode}
-          handleApplyPromo={handleApplyPromo}
-          handleRemoveItem={handleRemoveItem}
-          handleUpdateQuantity={handleUpdateQuantity}
-        />
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <HeaderBar
+        cartItems={cartItems}
+        totalPrice={totalPrice}
+        promoCode={promoCode}
+        setPromoCode={setPromoCode}
+        handleApplyPromo={handleApplyPromo}
+        handleRemoveItem={handleRemoveItem}
+        handleUpdateQuantity={handleUpdateQuantity}
+      />
 
-        <Segment basic>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "1rem",
-            }}
-          >
-            <Header as="h2" style={{ marginRight: "1rem" }}>
+      <Segment basic style={{ flex: 1 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "1rem",
+          }}
+        >
+          <div>
+            <Header as="h2" style={{ marginRight: "0.5rem" }}>
               Products
             </Header>
+          </div>
 
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
             <Dropdown
               selection
               options={sortOptions}
               value={sortValue}
               onChange={(e, { value }) => setSortValue(value)}
-              style={{ marginRight: "1rem" }}
+              style={{
+                display: "flex",
+                marginRight: "0.5rem",
+              }}
             />
 
             <Button
@@ -190,39 +231,71 @@ function ProductPage() {
               Add Product
             </Button>
           </div>
+        </div>
 
-          {loading ? (
-            <Loader active inline="centered">
-              Loading Products...
-            </Loader>
-          ) : products.length === 0 ? (
-            <Message info>No products found.</Message>
-          ) : (
-            <Grid columns={4} stackable>
-              {products.map((p) => (
-                <Grid.Column key={p._id}>
-                  <Card>
-                    <Image src={p.image1} wrapped ui={false} />
-                    <Card.Content>
-                      <Card.Header>{p.name}</Card.Header>
-                      <Card.Meta>${p.price}</Card.Meta>
-                      <Card.Description>{p.description}</Card.Description>
-                    </Card.Content>
-                    <Card.Content extra>
+        {loading ? (
+          <Loader active inline="centered">
+            Loading Products...
+          </Loader>
+        ) : error ? (
+          <Message negative>
+            <Message.Header>Error</Message.Header>
+            <p>{error}</p>
+          </Message>
+        ) : products.length === 0 ? (
+          <Message info>No products found.</Message>
+        ) : (
+          <Grid columns={isMobile ? 1 : 4} stackable>
+            {products.map((p) => (
+              <Grid.Column key={p._id}>
+                <Card>
+                  <Image
+                    src={p.image1}
+                    wrapped
+                    ui={false}
+                    onClick={() => navigate(`/product/${p._id}`)}
+                    style={{
+                      cursor: "pointer",
+                      height: "200px",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <Card.Content
+                    onClick={() => navigate(`/product/${p._id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Card.Header>{p.name}</Card.Header>
+                    <Card.Meta>${p.price}</Card.Meta>
+                    <Card.Description>
+                      {p.description && p.description.length > 100
+                        ? `${p.description.substring(0, 100)}...`
+                        : p.description}
+                    </Card.Description>
+                  </Card.Content>
+                  <Card.Content extra>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
                       <Button primary onClick={() => handleAddToCart(p)}>
                         Add to Cart
                       </Button>
-                    </Card.Content>
-                  </Card>
-                </Grid.Column>
-              ))}
-            </Grid>
-          )}
-        </Segment>
-        <Footer />
-      </div>
-    );
-  };
+                      <Button basic onClick={() => navigate(`/product/:id`)}>
+                        View
+                      </Button>
+                    </div>
+                  </Card.Content>
+                </Card>
+              </Grid.Column>
+            ))}
+          </Grid>
+        )}
+      </Segment>
+      <Footer />
+    </div>
+  );
 }
 
 export default ProductPage;

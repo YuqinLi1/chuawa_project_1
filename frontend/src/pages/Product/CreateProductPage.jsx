@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Header,
@@ -9,6 +9,7 @@ import {
   Segment,
   Image,
   Grid,
+  Dropdown,
 } from "semantic-ui-react";
 import useWindowSize from "../../hooks/useWindowSize";
 import api from "../../services/api";
@@ -16,13 +17,13 @@ import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
 
 function CreateProductPage({
-  cartItems,
-  totalPrice,
-  promoCode,
-  setPromoCode,
-  handleApplyPromo,
-  handleRemoveItem,
-  handleUpdateQuantity,
+  cartItems = [],
+  totalPrice = 0,
+  promoCode = "",
+  setPromoCode = () => {},
+  handleApplyPromo = () => {},
+  handleRemoveItem = () => {},
+  handleUpdateQuantity = () => {},
 }) {
   const { width } = useWindowSize();
   const isMobile = width < 600;
@@ -37,6 +38,13 @@ function CreateProductPage({
 
   // For local file upload
   const [selectedFile, setSelectedFile] = useState(null);
+
+  const categoryOptions = [
+    { key: "1", text: "Category1", value: "Category1" },
+    { key: "2", text: "Category2", value: "Category2" },
+    { key: "3", text: "Category3", value: "Category3" },
+    { key: "4", text: "Category4", value: "Category4" },
+  ];
 
   // Submit handler
   const handleSubmit = async (e) => {
@@ -83,9 +91,15 @@ function CreateProductPage({
     }
   };
 
+  // preview URL
+  const previewImage = selectedFile
+    ? URL.createObjectURL(selectedFile)
+    : imageLink;
+
   return (
-    <div>
-      {/* HeaderBar at the top of this page */}
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
       <HeaderBar
         cartItems={cartItems}
         totalPrice={totalPrice}
@@ -95,23 +109,20 @@ function CreateProductPage({
         handleRemoveItem={handleRemoveItem}
         handleUpdateQuantity={handleUpdateQuantity}
       />
-      <Container style={{ marginTop: isMobile ? "1rem" : "2rem" }}>
-        <Header as="h2" textAlign="center">
+      <Container style={{ margin: "1rem auto", maxWidth: "800px", flex: 1 }}>
+        <Header as="h2" textAlign="left">
           Create Product
         </Header>
-
         <Segment padded={isMobile}>
           <Form onSubmit={handleSubmit}>
-            /** product name */
             <Form.Field required>
               <label>Product Name</label>
               <Input
-                placeholder="Watch"
+                placeholder="iWatch"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </Form.Field>
-            {/* product description  */}
             <Form.Field>
               <label>Product Description</label>
               <TextArea
@@ -125,10 +136,13 @@ function CreateProductPage({
                 <Grid.Column>
                   <Form.Field>
                     <label>Category</label>
-                    <Input
-                      placeholder="Category"
+                    <Dropdown
+                      placeholder="Category1"
+                      fluid
+                      selection
+                      options={categoryOptions}
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
+                      onChange={(e, { value }) => setCategory(value)}
                     />
                   </Form.Field>
                 </Grid.Column>
@@ -138,7 +152,7 @@ function CreateProductPage({
                     <label>Price</label>
                     <Input
                       type="number"
-                      placeholder="100"
+                      placeholder="50"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                     />
@@ -152,7 +166,7 @@ function CreateProductPage({
                     <label>In Stock Quantity</label>
                     <Input
                       type="number"
-                      placeholder="50"
+                      placeholder="100"
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
                     />
@@ -161,34 +175,49 @@ function CreateProductPage({
 
                 <Grid.Column>
                   <Form.Field>
-                    <label>Image Link (URL)</label>
-                    <Input
-                      placeholder="https://example.com/image.jpg"
-                      value={imageLink}
-                      onChange={(e) => setImageLink(e.target.value)}
-                    />
+                    <label>Add Image Link</label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <Input
+                        placeholder="https://"
+                        value={imageLink}
+                        onChange={(e) => setImageLink(e.target.value)}
+                        style={{ marginRight: "0.5rem" }}
+                      />
+                      <Button
+                        icon="upload"
+                        onClick={() =>
+                          document.getElementById("fileInput").click()
+                        }
+                      />
+
+                      <input
+                        id="fileInput"
+                        type="file"
+                        style={{ display: "none" }}
+                        onChange={handleFileChange}
+                      />
+                    </div>
                   </Form.Field>
                 </Grid.Column>
               </Grid.Row>
             </Grid>
-            <Form.Field>
-              <label>Upload Image</label>
-              <Input type="file" onChange={handleFileChange} />
-              {selectedFile && (
-                <p style={{ marginTop: "0.5rem" }}>
-                  Selected: {selectedFile.name}
-                </p>
-              )}
-            </Form.Field>
-            {imageLink && (
-              <Segment textAlign="center" style={{ marginTop: "1rem" }}>
+
+            {previewImage && (
+              <Segment
+                textAlign="center"
+                style={{
+                  marginTop: "1rem",
+                  border: "2px dashed #ccc",
+                  padding: "1rem",
+                }}
+              >
                 <Image
-                  src={imageLink}
+                  src={previewImage}
                   size="small"
                   centered
                   alt="Product preview"
                 />
-                <p style={{ marginTop: "0.5rem" }}>Image Upload</p>
+                <p style={{ marginTop: "0.5rem" }}>image preview!</p>
               </Segment>
             )}
             <Button primary type="submit" style={{ marginTop: "1rem" }}>

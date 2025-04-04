@@ -9,7 +9,6 @@ function Footer() {
       style={{
         backgroundColor: "#1B1C1D",
         padding: "1rem 1rem",
-        marginTop: "2rem",
         borderRadius: 0,
       }}
     >

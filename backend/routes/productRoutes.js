@@ -6,28 +6,24 @@ const productController = require("../controller/productController");
 
 // public: get products
 router.get("/", productController.fetchAllProducts);
-router.get("/:productId", productController.fetchSingleProd);
+router.get("/:id", productController.fetchSingleProd);
 
 // admin only: create, update, delete
 router.post(
-  "/",
+  "/create-product",
   userAuth,
   checkAdmin,
   upload.single("image"),
   productController.createProduct
 );
+
 router.put(
-  "/:productId",
+  "/:id",
   userAuth,
   checkAdmin,
   upload.single("image"),
   productController.updateProduct
 );
-router.delete(
-  "/:productId",
-  userAuth,
-  checkAdmin,
-  productController.deleteProduct
-);
+router.delete("/:id", userAuth, checkAdmin, productController.deleteProduct);
 
 module.exports = router;

@@ -15,14 +15,13 @@ import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
 
 function ProductDetailPage({
-  cartItems,
-  totalPrice,
-  promoCode,
-  setPromoCode,
-  handleApplyPromo,
-  handleRemoveItem,
-  handleUpdateQuantity,
-  handleAddToCart,
+  cartItems = [],
+  totalPrice = 0,
+  promoCode = "",
+  setPromoCode = () => {},
+  handleApplyPromo = () => {},
+  handleRemoveItem = () => {},
+  handleUpdateQuantity = () => {},
 }) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +39,21 @@ function ProductDetailPage({
     try {
       setLoading(true);
       const res = await api.get(`/products/${id}`);
-      setProduct(res.data);
+      // if valid data from backend
+      if (!res.data) {
+        setErrorMessage("No product data received from server");
+        setLoading(false);
+        return;
+      }
+      // check if fetch product or not
+      if (res.data.hasOwnProperty("success") && !res.data.success) {
+        setErrorMessage(res.data.message || "Failed to fetch product");
+        setLoading(false);
+        return;
+      }
+
+      const productData = res.data.singleProd || res.data;
+      setProduct(productData);
     } catch (error) {
       console.error("Error fetching product:", error);
     } finally {
@@ -67,7 +80,9 @@ function ProductDetailPage({
   // loading
   if (loading) {
     return (
-      <div>
+      <div
+        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      >
         <HeaderBar
           cartItems={cartItems}
           totalPrice={totalPrice}
@@ -80,6 +95,9 @@ function ProductDetailPage({
         <Loader active inline="centered">
           Loading product...
         </Loader>
+        <div style={{ marginTop: "auto" }}>
+          <Footer />
+        </div>
       </div>
     );
   }
@@ -88,7 +106,9 @@ function ProductDetailPage({
 
   if (!product) {
     return (
-      <div>
+      <div
+        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      >
         <HeaderBar
           cartItems={cartItems}
           totalPrice={totalPrice}
@@ -99,12 +119,17 @@ function ProductDetailPage({
           handleUpdateQuantity={handleUpdateQuantity}
         />
         <Message negative>No product found.</Message>
+        <div style={{ marginTop: "auto" }}>
+          <Footer />
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
       <HeaderBar
         cartItems={cartItems}
         totalPrice={totalPrice}
@@ -115,7 +140,7 @@ function ProductDetailPage({
         handleUpdateQuantity={handleUpdateQuantity}
       />
 
-      <Segment basic>
+      <Segment basic style={{ flex: 1, padding: "1rem" }}>
         <Header as="h2">Product Detail</Header>
         <Grid stackable>
           <Grid.Row>
@@ -141,6 +166,8 @@ function ProductDetailPage({
                 </Button>
                 <Button style={{ marginLeft: "1rem" }}>Edit</Button>
               </div>
+              {cartMessage && <p style={{ color: "green" }}>{cartMessage}</p>}
+              {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
             </Grid.Column>
           </Grid.Row>
         </Grid>

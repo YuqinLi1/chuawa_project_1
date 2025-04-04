@@ -3,6 +3,7 @@ import { Container, Header, Button, Icon } from "semantic-ui-react";
 import { useNavigate } from "react-router-dom";
 import useWindowSize from "../../hooks/useWindowSize";
 import HeaderBar from "../../components/HeaderBar";
+import Footer from "../../components/Footer";
 
 const ErrorPage = () => {
   const navigate = useNavigate();
@@ -18,7 +19,14 @@ const ErrorPage = () => {
   const handleUpdateQuantity = () => {};
 
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh", // ensures full viewport height
+        margin: 0, // remove default body margin if needed
+      }}
+    >
       <HeaderBar
         cartItems={cartItems}
         totalPrice={totalPrice}
@@ -32,7 +40,11 @@ const ErrorPage = () => {
       <Container
         text
         textAlign="center"
-        style={{ marginTop: isMobile ? "2rem" : "5rem" }}
+        style={{
+          marginTop: isMobile ? "2rem" : "5rem",
+          flex: 1,
+          padding: "1rem",
+        }}
       >
         <Icon name="exclamation circle" size="huge" color="violet" />
         <Header as="h1" style={{ marginTop: "1rem" }}>
@@ -42,6 +54,7 @@ const ErrorPage = () => {
           Go Home
         </Button>
       </Container>
+      <Footer />
     </div>
   );
 };
