@@ -224,7 +224,7 @@ function ProductPage() {
 
             <Button
               color="green"
-              onClick={() => navigate("/create-product")}
+              onClick={() => navigate("/products/create-product")}
               style={{ marginRight: "1rem" }}
             >
               <Icon name="plus" />
@@ -253,7 +253,7 @@ function ProductPage() {
                     src={p.image1}
                     wrapped
                     ui={false}
-                    onClick={() => navigate(`/product/${p._id}`)}
+                    onClick={() => navigate(`/products/${p._id}`)}
                     style={{
                       cursor: "pointer",
                       height: "200px",
@@ -261,7 +261,7 @@ function ProductPage() {
                     }}
                   />
                   <Card.Content
-                    onClick={() => navigate(`/product/${p._id}`)}
+                    onClick={() => navigate(`/products/${p._id}`)}
                     style={{ cursor: "pointer" }}
                   >
                     <Card.Header>{p.name}</Card.Header>
@@ -282,7 +282,10 @@ function ProductPage() {
                       <Button primary onClick={() => handleAddToCart(p)}>
                         Add to Cart
                       </Button>
-                      <Button basic onClick={() => navigate(`/product/:id`)}>
+                      <Button
+                        basic
+                        onClick={() => navigate(`/products/${p._id}`)}
+                      >
                         View
                       </Button>
                     </div>

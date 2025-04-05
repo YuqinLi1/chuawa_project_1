@@ -46,14 +46,11 @@ function ProductDetailPage({
         return;
       }
       // check if fetch product or not
-      if (res.data.hasOwnProperty("success") && !res.data.success) {
+      if (res.data && res.data.success && res.data.singleProd) {
+        setProduct(res.data.singleProd);
+      } else if (res.data && !res.data.success) {
         setErrorMessage(res.data.message || "Failed to fetch product");
-        setLoading(false);
-        return;
       }
-
-      const productData = res.data.singleProd || res.data;
-      setProduct(productData);
     } catch (error) {
       console.error("Error fetching product:", error);
     } finally {

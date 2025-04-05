@@ -64,7 +64,7 @@ function CreateProductPage({
         formData.append("image1", imageLink);
       }
 
-      const res = await api.post("/products", formData, {
+      const res = await api.post("/products/create-product", formData, {
         headers: {
           "Content-Type": "multipart/form-data", // tells the server that the request body contains multipart form data
         },
