@@ -1,48 +1,53 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel.js");
 const mongoose = require("mongoose");
-const crypto = require("crypto");
-
 const expiryDate = new Date();
 const date1 = expiryDate.setTime(expiryDate.getTime() + 12);
+const nodemailer = require('nodemailer')
+
+function generateTempPassword() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  return Array.from({ length: 10 }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length))
+  ).join('');
+}
 
 //register user
 const registerUser = asyncHandler(async (req, res) => {
-  const { email, password, role } = req?.body;
+  const { email, password, role } = req.body;
+
   try {
-    const user = await User.findOne({ email: email });
-    if (user) {
-      throw new Error("User Already exists! Please Login.");
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists, please login.",
+      });
     }
-    const salt = await bcrypt.genSalt(10);
-    const encryptedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      email: email,
-      password: encryptedPassword,
+      email,
+      password, // save plain text directly
       role: role || "user",
     });
 
-    //set cookie token
-    const data = {
-      id: newUser?._id,
-    };
-    const token = jwt.sign(data, process.env.APP_JWT_SECRET_KEY, {
+    const token = jwt.sign({ id: newUser._id }, process.env.APP_JWT_SECRET_KEY, {
       expiresIn: "12h",
     });
 
-    const createdUser = newUser;
-    createdUser.password = undefined;
-
     res
       .status(200)
-      .cookie("token", token, { expires: new Date(Date.now() + date1) })
-      .json({ success: true, token, createdUser });
+      .cookie("token", token, {
+        httpOnly: true,
+        sameSite: "None",
+        secure: true,
+        maxAge: 12 * 60 * 60 * 1000,
+      })
+      .json({ success: true, token, user: { email: newUser.email, role: newUser.role } });
   } catch (error) {
-    res.status(401).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -54,17 +59,15 @@ const userLogin = asyncHandler(async (req, res) => {
   const { email, password } = req?.body;
 
   try {
-    const emailExists = await User.findOne({ email: email }).populate("saved");
-
+    const emailExists = await User.findOne({ email: email });
     if (!emailExists) {
       throw new Error("User Does not exist! Please Register.");
     }
 
-    const user = await User.findOne({ email: email });
-    const comparePassword = await bcrypt.compare(password, user?.password);
+    const user = emailExists;
 
-    if (!comparePassword) {
-      throw new Error("Password Dosent Match!");
+    if (password !== user?.password) {
+      throw new Error("Password doesn't match!");
     }
 
     const data = {
@@ -100,34 +103,42 @@ const userLogin = asyncHandler(async (req, res) => {
 
 //user change password controller/logic
 const userPasswordUpdate = asyncHandler(async (req, res) => {
-  const { password } = req?.body;
-  const id = req?.user?._id;
+  const { email } = req.body;
 
+  // 1. Check if user exists
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: 'No user found with this email.' });
+  }
+
+  // 2. Generate temp password and update user
+  const tempPassword = generateTempPassword();
+  user.password = tempPassword; // plain text as per your setup
+  await user.save();
+
+  // 3. Send email with nodemailer
   try {
-    const user = await User.findById(id);
-
-    const comparePassword = await bcrypt.compare(password, user?.password);
-    if (comparePassword) {
-      throw new Error("Please enter a different password from your own.");
-    } else {
-      const salt = await bcrypt.genSalt(10);
-      const encryptedPassword = await bcrypt.hash(password, salt);
-
-      user.password = encryptedPassword;
-
-      const updatedUser1 = await user.save();
-
-      const updatedUser = await User.findById(id).select("-password");
-
-      res.status(200).json({
-        updatedUser,
-      });
-    }
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'chenguanghe1992@gmail.com',
+        pass: 'porsche911GT3RS$',
+      },
     });
+
+    const mailOptions = {
+      from: 'hechengu@usc.edu',
+      to: email,
+      subject: 'Update Password',
+      text: `Your temporary password is: ${tempPassword}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ email, tempPassword });
+  } catch (error) {
+    console.error('Email send failed:', error);
+    res.status(500).json({ message: 'Failed to send email.' });
   }
 });
 

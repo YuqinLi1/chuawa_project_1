@@ -1,95 +1,63 @@
-import React, { useState } from "react";
-import { Menu, Input, Icon, Header } from "semantic-ui-react";
+import React from "react";
+import {
+  Menu,
+  Input,
+  Icon,
+  Button,
+  Container,
+  Header as SemanticHeader,
+} from "semantic-ui-react";
 import { useNavigate } from "react-router-dom";
-import CartSidebar from "./CartSidebar";
-import api from "../services/api";
+import "./Components.css";
 
-const HeaderBar = ({
-  cartItems,
-  totalPrice,
-  promoCode,
-  setPromoCode,
-  handleApplyPromo,
-  handleRemoveItem,
-  handleUpdateQuantity,
-}) => {
-  const [cartVisible, setCartVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+function HeaderBar({ totalPrice = 0, searchTerm, setSearchTerm, handleSearch }) {
   const navigate = useNavigate();
 
-  const handleSearch = async () => {
-    try {
-      const res = await api.get("/products", {
-        params: { search: searchTerm },
-      });
-    } catch (error) {
-      console.error("Error searching products:", error);
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearch?.();
     }
   };
 
   return (
-    <div>
-      <Menu
-        secondary
-        style={{
-          backgroundColor: "#1B1C1D",
-          padding: "0.5rem 1rem",
-          border: "none",
-        }}
-      >
-        <Menu.Item header>
-          <Header as="h3" inverted>
+    <Menu borderless fixed="top" className="top-bar" style={{ marginBottom: 0 }}>
+      <Container fluid className="d-flex justify-content-between align-items-center w-100">
+        {/* Left: Brand */}
+        <Menu.Item>
+          <SemanticHeader as="h4" inverted style={{ marginBottom: 0 }}>
             Management
-            <Header.Subheader style={{ fontSize: "0.8rem", color: "#ccc" }}>
-              chuwa
-            </Header.Subheader>
-          </Header>
+          </SemanticHeader>
         </Menu.Item>
 
-        <Menu.Item style={{ flex: 1 }}>
+        {/* Center: Search */}
+        <Menu.Item className="navbar-search">
           <Input
-            placeholder="Search..."
-            fluid
             icon={<Icon name="search" link onClick={handleSearch} />}
+            placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleSearch();
-            }}
+            onKeyDown={handleKeyDown}
+            fluid
           />
         </Menu.Item>
 
-        <Menu.Menu position="right">
-          <Menu.Item
-            onClick={() => navigate("/sign-out")}
-            style={{ color: "#fff" }}
-          >
-            <Icon name="user" style={{ marginRight: "0.5rem" }} />
-            Sign out
+        {/* Right: Sign out + cart */}
+        <Menu.Menu position="right" className="gap-3 align-items-center">
+          <Menu.Item>
+            <Button color="blue" onClick={() => navigate("/sign-out")}>
+              Sign Out
+            </Button>
           </Menu.Item>
-          <Menu.Item
-            onClick={() => setCartVisible(true)}
-            style={{ color: "#fff" }}
-          >
-            <Icon name="shopping cart" style={{ marginRight: "0.5rem" }} />$
-            {totalPrice.toFixed(2)}
+          <Menu.Item onClick={() => navigate("/cart")}>
+            <span role="img" aria-label="cart" className="cart-icon">
+              🛒 ${totalPrice.toFixed(2)}
+            </span>
           </Menu.Item>
         </Menu.Menu>
-      </Menu>
-
-      <CartSidebar
-        visible={cartVisible}
-        onClose={() => setCartVisible(false)}
-        cartItems={cartItems}
-        totalPrice={totalPrice}
-        promoCode={promoCode}
-        setPromoCode={setPromoCode}
-        handleApplyPromo={handleApplyPromo}
-        handleRemoveItem={handleRemoveItem}
-        handleUpdateQuantity={handleUpdateQuantity}
-      />
-    </div>
+      </Container>
+    </Menu>
   );
-};
+}
 
 export default HeaderBar;
