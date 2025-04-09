@@ -8,9 +8,9 @@ import {
 } from "semantic-ui-react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import HeaderBar from "../components/HeaderBar";
-import Footer from "../components/Footer";
-import "../App.css";
+import HeaderBar from "../../components/HeaderBar";
+import Footer from "../../components/Footer";
+import "../../App.css";
 
 function SignUp() {
   const navigate = useNavigate();

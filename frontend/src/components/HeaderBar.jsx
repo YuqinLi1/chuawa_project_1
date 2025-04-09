@@ -1,62 +1,55 @@
-import React from "react";
-import {
-  Menu,
-  Input,
-  Icon,
-  Button,
-  Container,
-  Header as SemanticHeader,
-} from "semantic-ui-react";
+import React, { useEffect, useState } from "react";
+import { Menu, Header, Icon } from "semantic-ui-react";
 import { useNavigate } from "react-router-dom";
-import "./Components.css";
+import axios from "axios";
+import UserSidebar from "./UserSidebar";
 
-function HeaderBar({ totalPrice = 0, searchTerm, setSearchTerm, handleSearch }) {
+function HeaderBar() {
+  const [user, setUser] = useState(null);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const navigate = useNavigate();
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSearch?.();
-    }
-  };
+  useEffect(() => {
+    // Fetch user data from token on mount (optional enhancement)
+    axios
+      .get("http://localhost:5000/api/auth/me", { withCredentials: true })
+      .then((res) => setUser(res.data.user))
+      .catch(() => setUser(null));
+  }, []);
 
   return (
-    <Menu borderless fixed="top" className="top-bar" style={{ marginBottom: 0 }}>
-      <Container fluid className="d-flex justify-content-between align-items-center w-100">
-        {/* Left: Brand */}
-        <Menu.Item>
-          <SemanticHeader as="h4" inverted style={{ marginBottom: 0 }}>
+    <>
+      <Menu secondary style={{ backgroundColor: "#1B1C1D", padding: "0.5rem 1rem" }}>
+        <Menu.Item header>
+          <Header as="h3" inverted>
             Management
-          </SemanticHeader>
+            <Header.Subheader style={{ fontSize: "0.8rem", color: "#ccc" }}>
+              chuwa
+            </Header.Subheader>
+          </Header>
         </Menu.Item>
 
-        {/* Center: Search */}
-        <Menu.Item className="navbar-search">
-          <Input
-            icon={<Icon name="search" link onClick={handleSearch} />}
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={handleKeyDown}
-            fluid
-          />
-        </Menu.Item>
-
-        {/* Right: Sign out + cart */}
-        <Menu.Menu position="right" className="gap-3 align-items-center">
-          <Menu.Item>
-            <Button color="blue" onClick={() => navigate("/sign-out")}>
-              Sign Out
-            </Button>
-          </Menu.Item>
-          <Menu.Item onClick={() => navigate("/cart")}>
-            <span role="img" aria-label="cart" className="cart-icon">
-              🛒 ${totalPrice.toFixed(2)}
-            </span>
-          </Menu.Item>
+        <Menu.Menu position="right">
+          {!user ? (
+            <Menu.Item style={{ color: "#ccc" }}>
+              <Icon name="user" />
+              Sign In
+            </Menu.Item>
+          ) : (
+            <Menu.Item onClick={() => setSidebarVisible(true)} style={{ color: "#fff" }}>
+              <Icon name="user" />
+              Hello, {user.email}
+            </Menu.Item>
+          )}
         </Menu.Menu>
-      </Container>
-    </Menu>
+      </Menu>
+
+      <UserSidebar
+        visible={sidebarVisible}
+        onHide={() => setSidebarVisible(false)}
+        user={user}
+      />
+    </>
   );
 }
 

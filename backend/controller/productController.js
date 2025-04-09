@@ -31,29 +31,29 @@ const createProduct = asyncHandler(async (req, res) => {
 const fetchAllProducts = asyncHandler(async (req, res) => {
   try {
     const { sortField, sortOrder, search } = req.query;
+
     let sortOption = {};
     if (sortField) {
       if (sortField === "lastAdded") {
-        // time order
         sortOption.createdAt = -1;
       } else {
-        // asc or dec order
         sortOption[sortField] = sortOrder === "asc" ? 1 : -1;
       }
     }
 
     let query = {};
     if (search) {
-      query.name = { $regex: search, $options: "i" }; // ignoring case
+      query.name = { $regex: search, $options: "i" };
     }
 
     const allProducts = await Product.find(query).sort(sortOption);
+
     res.status(200).json({
       success: true,
       allProducts,
     });
   } catch (error) {
-    res.status(401).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });

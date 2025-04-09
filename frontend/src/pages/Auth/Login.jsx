@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Container, Form, Input, Button, Message } from "semantic-ui-react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import HeaderBar from "../components/HeaderBar";
-import Footer from "../components/Footer";
-import "../App.css";
+import HeaderBar from "../../components/HeaderBar";
+import Footer from "../../components/Footer";
+import "../../App.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -121,7 +121,7 @@ function Login() {
               <span
                 className="text-primary"
                 role="button"
-                onClick={() => navigate("/p-update")}
+                onClick={() => navigate("/p-reset")}
               >
                 Forgot password?
               </span>

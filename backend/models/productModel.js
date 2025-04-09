@@ -1,42 +1,18 @@
 const express = require("express");
 const mongoose = require("mongoose");
 
-const productSchema = new mongoose.Schema(
+const ProductSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-    },
-
-    stock: {
-      type: Number,
-      default: 0,
-    },
-
-    price: {
-      type: Number,
-    },
-
-    category: {
-      type: String,
-    },
-
-    image1: {
-      type: String,
-    },
-
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    name: String,
+    price: Number,
+    description: String,
+    stock: Number,
+    category: String,
+    image1: String,
   },
-  {
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
-    timestamps: true,
-  }
+  { collection: "products", timestamps: true }
 );
 
-const Product = mongoose.model("Prodect", productSchema);
+const Product = mongoose.model("Prodect", ProductSchema);
 
 module.exports = Product;

@@ -1,9 +1,9 @@
 import React from "react";
 import { Container, Button } from "semantic-ui-react";
 import { useNavigate } from "react-router-dom";
-import HeaderBar from "../components/HeaderBar";
-import Footer from "../components/Footer";
-import "../App.css";
+import HeaderBar from "../../components/HeaderBar";
+import Footer from "../../components/Footer";
+import "../../App.css";
 
 function PasswordSucceed() {
   const navigate = useNavigate();

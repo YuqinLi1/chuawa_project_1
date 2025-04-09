@@ -7,13 +7,6 @@ const expiryDate = new Date();
 const date1 = expiryDate.setTime(expiryDate.getTime() + 12);
 const nodemailer = require('nodemailer')
 
-function generateTempPassword() {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length: 10 }, () =>
-    chars.charAt(Math.floor(Math.random() * chars.length))
-  ).join('');
-}
-
 //register user
 const registerUser = asyncHandler(async (req, res) => {
   const { email, password, role } = req.body;
@@ -29,7 +22,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const newUser = await User.create({
       email,
-      password, // save plain text directly
+      password,
       role: role || "user",
     });
 
@@ -65,6 +58,8 @@ const userLogin = asyncHandler(async (req, res) => {
     }
 
     const user = emailExists;
+    console.log(emailExists);
+    console.log(password +" "+user.password);
 
     if (password !== user?.password) {
       throw new Error("Password doesn't match!");
@@ -103,43 +98,22 @@ const userLogin = asyncHandler(async (req, res) => {
 
 //user change password controller/logic
 const userPasswordUpdate = asyncHandler(async (req, res) => {
-  const { email } = req.body;
+  const { userId, email, newPassword } = req.body;
 
-  // 1. Check if user exists
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(400).json({ message: 'No user found with this email.' });
+  if (!userId || !email || !newPassword) {
+    return res.status(400).json({ message: "Missing fields." });
   }
 
-  // 2. Generate temp password and update user
-  const tempPassword = generateTempPassword();
-  user.password = tempPassword; // plain text as per your setup
+  const user = await User.findById(userId);
+
+  if (!user || user.email !== email) {
+    return res.status(400).json({ message: "Invalid user ID or email mismatch." });
+  }
+
+  user.password = newPassword;
   await user.save();
 
-  // 3. Send email with nodemailer
-  try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'chenguanghe1992@gmail.com',
-        pass: 'porsche911GT3RS$',
-      },
-    });
-
-    const mailOptions = {
-      from: 'hechengu@usc.edu',
-      to: email,
-      subject: 'Update Password',
-      text: `Your temporary password is: ${tempPassword}`,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res.status(200).json({ email, tempPassword });
-  } catch (error) {
-    console.error('Email send failed:', error);
-    res.status(500).json({ message: 'Failed to send email.' });
-  }
+  res.status(200).json({ message: "Password updated successfully." });
 });
 
 //save a product logic
@@ -210,10 +184,24 @@ const unSaveProduct = asyncHandler(async (req, res) => {
   }
 });
 
+const getMe = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password");
+  res.status(200).json({ user });
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+  res
+    .clearCookie("token", { httpOnly: true, sameSite: "None", secure: true })
+    .status(200)
+    .json({ message: "Logged out successfully" });
+});
+
 module.exports = {
   registerUser,
   userLogin,
   userPasswordUpdate,
   saveProduct,
   unSaveProduct,
+  getMe,
+  logoutUser,
 };
