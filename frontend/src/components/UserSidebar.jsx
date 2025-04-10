@@ -32,14 +32,9 @@ function UserSidebar({ visible, onHide, user }) {
 
       {user?.role?.toLowerCase() === "admin" &&  (
         <>
-          <Menu.Item onClick={() => navigate("/products/create-product")}>
+          <Menu.Item onClick={() => navigate("/product/create")}>
             <Icon name="plus" />
             Create Product
-          </Menu.Item>
-
-          <Menu.Item onClick={() => navigate("/products/create-product")}>
-            <Icon name="trash" />
-            Delete Product
           </Menu.Item>
         </>
       )}

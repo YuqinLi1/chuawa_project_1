@@ -5,22 +5,24 @@ const mongoose = require("mongoose");
 
 //create product
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, stock, category } = req?.body;
-  const image1 = req.file ? req.file.path : req.body.image1;
+  const { name, price, description, stock, category, image} = req.body;
+
   try {
-    // create product
     const newProduct = await Product.create({
       name,
       price,
       description,
       stock,
       category,
-      image1,
+      image,
     });
 
-    res.status(200).json(newProduct);
+    res.status(200).json({
+      success: true,
+      product: newProduct,
+    });
   } catch (error) {
-    res.status(401).json({
+    res.status(400).json({
       success: false,
       message: error.message,
     });
@@ -63,9 +65,11 @@ const fetchAllProducts = asyncHandler(async (req, res) => {
 //fetch single product
 const fetchSingleProd = asyncHandler(async (req, res) => {
   const { id } = req?.params;
+  console.log("input id "+id);
   try {
-    const singleProd = await Product.findById(id).populate("user");
+    const singleProd = await Product.findById(id);
 
+    console.log(singleProd);
     //  check if product exists
     if (!singleProd) {
       return res.status(404).json({
@@ -79,6 +83,52 @@ const fetchSingleProd = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     res.status(401).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+const searchProduct = asyncHandler(async (req, res) => {
+  const keyword = req.params.keyword?.trim();
+
+  let query = {};
+  if (keyword && keyword !== "") {
+    query = {
+      $or: [
+        { name: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ],
+    };
+  }
+
+  try {
+    const products = await Product.find(query);
+    res.status(200).json({ success: true, products });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+const fetchProductByName = asyncHandler(async (req, res) => {
+  const { name } = req.params;
+  try {
+    const singleProd = await Product.findOne({ name: { $regex: new RegExp(name, "i") } });
+    if (!singleProd) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      singleProd,
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -133,4 +183,6 @@ module.exports = {
   fetchSingleProd,
   updateProduct,
   deleteProduct,
+  searchProduct,
+  fetchProductByName,
 };

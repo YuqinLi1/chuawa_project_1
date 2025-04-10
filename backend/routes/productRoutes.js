@@ -7,13 +7,14 @@ const productController = require("../controller/productController");
 // public: get products
 router.get("/", productController.fetchAllProducts);
 router.get("/:id", productController.fetchSingleProd);
+router.get("/name/:name", productController.fetchProductByName);
+router.get("/search/:keyword", productController.searchProduct);
 
 // admin only: create, update, delete
 router.post(
-  "/create-product",
+  "/create",
   userAuth,
   checkAdmin,
-  upload.single("image"),
   productController.createProduct
 );
 

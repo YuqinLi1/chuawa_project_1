@@ -1,231 +1,159 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
-  Container,
+  Segment,
+  Image,
   Header,
+  Button,
+  Label,
   Form,
   Input,
   TextArea,
-  Button,
-  Segment,
-  Image,
-  Grid,
-  Dropdown,
+  Dropdown
 } from "semantic-ui-react";
-import useWindowSize from "../../hooks/useWindowSize";
 import api from "../../services/api";
 import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
 
-function CreateProductPage({
-  cartItems = [],
-  totalPrice = 0,
-  promoCode = "",
-  setPromoCode = () => {},
-  handleApplyPromo = () => {},
-  handleRemoveItem = () => {},
-  handleUpdateQuantity = () => {},
-}) {
-  const { width } = useWindowSize();
-  const isMobile = width < 600;
+function CreateProductPage() {
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [product, setProduct] = useState({
+    name: "",
+    description: "",
+    category: "electronic",
+    price: "",
+    stock: "",
+    imageUrl: "",
+  });
 
-  // form filed update
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
-  const [imageLink, setImageLink] = useState("");
+  const navigate = useNavigate();
 
-  // For local file upload
-  const [selectedFile, setSelectedFile] = useState(null);
+  const handleChange = (e, { name, value }) => {
+    setProduct({ ...product, [name]: value });
+  };
 
-  const categoryOptions = [
-    { key: "1", text: "Category1", value: "Category1" },
-    { key: "2", text: "Category2", value: "Category2" },
-    { key: "3", text: "Category3", value: "Category3" },
-    { key: "4", text: "Category4", value: "Category4" },
-  ];
+  const handlePreview = () => {
+    if (product.imageUrl.startsWith("http")) {
+      setPreviewUrl(product.imageUrl);
+    } else {
+      alert("Please enter a valid image URL");
+    }
+  };
 
-  // Submit handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleAddProduct = async () => {
     try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("category", category);
-      formData.append("price", price);
-      formData.append("stock", stock);
-
-      if (selectedFile) {
-        formData.append("image", selectedFile);
-      } else {
-        formData.append("image1", imageLink);
-      }
-
-      const res = await api.post("/products/create-product", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // tells the server that the request body contains multipart form data
+      const response = await api.post(
+        "/products/create",
+        {
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          price: parseFloat(product.price),
+          stock: parseInt(product.stock),
+          image1: product.imageUrl,
         },
-      });
+        { withCredentials: true }
+      );
 
-      console.log("Product created:", res.data);
-      // Reset fields
-      setName("");
-      setDescription("");
-      setCategory("");
-      setPrice("");
-      setStock("");
-      setImageLink("");
-      setSelectedFile(null);
+      alert("Product added successfully!");
+      navigate("/products");
     } catch (error) {
-      console.error("Error creating product:", error);
+      console.error("Failed to create product:", error);
+      alert("Failed to add product.");
     }
   };
-
-  // Handle local file changes
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
-
-  // preview URL
-  const previewImage = selectedFile
-    ? URL.createObjectURL(selectedFile)
-    : imageLink;
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-    >
-      <HeaderBar
-        cartItems={cartItems}
-        totalPrice={totalPrice}
-        promoCode={promoCode}
-        setPromoCode={setPromoCode}
-        handleApplyPromo={handleApplyPromo}
-        handleRemoveItem={handleRemoveItem}
-        handleUpdateQuantity={handleUpdateQuantity}
-      />
-      <Container style={{ margin: "1rem auto", maxWidth: "800px", flex: 1 }}>
-        <Header as="h2" textAlign="left">
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <HeaderBar />
+      <Segment basic className="create-edit-product-page">
+        <Header as="h2" textAlign="center" style={{ marginBottom: "2rem" }}>
           Create Product
         </Header>
-        <Segment padded={isMobile}>
-          <Form onSubmit={handleSubmit}>
-            <Form.Field required>
-              <label>Product Name</label>
+
+        <Form>
+          <Form.Field
+            control={TextArea}
+            label="Product Name"
+            name="name"
+            placeholder="Enter product name (max 100 words)"
+            maxLength={100}
+            value={product.name}
+            onChange={handleChange}
+          />
+
+          <Form.Field
+            control={TextArea}
+            label="Product Description"
+            name="description"
+            placeholder="Enter product description (max 500 words)"
+            rows={3}
+            maxLength={500}
+            value={product.description}
+            onChange={handleChange}
+          />
+
+          <Form.Group widths="equal">
+            <Form.Field
+              control={Dropdown}
+              label="Category"
+              name="category"
+              selection
+              options={[
+                { key: "electronic", text: "Electronic", value: "electronic" },
+                { key: "daily", text: "Daily", value: "daily" },
+                { key: "grocery", text: "Grocery", value: "grocery" },
+                { key: "other", text: "Other", value: "other" },
+              ]}
+              value={product.category}
+              onChange={handleChange}
+            />
+
+            <Form.Field
+              control={Input}
+              label="Price ($)"
+              type="number"
+              name="price"
+              value={product.price}
+              onChange={handleChange}
+            />
+          </Form.Group>
+
+          <Form.Group widths="equal">
+            <Form.Field
+              control={Input}
+              label="In Stock Quantity"
+              type="number"
+              name="stock"
+              value={product.stock}
+              onChange={handleChange}
+            />
+
+            <Form.Field width={10}>
+              <label>Add Image Link</label>
               <Input
-                placeholder="iWatch"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                action={{ icon: "eye", onClick: handlePreview }}
+                placeholder="https://example.com/image.jpg"
+                name="imageUrl"
+                value={product.imageUrl}
+                onChange={handleChange}
               />
             </Form.Field>
-            <Form.Field>
-              <label>Product Description</label>
-              <TextArea
-                placeholder="Enter product description..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </Form.Field>
-            <Grid columns={2} stackable>
-              <Grid.Row>
-                <Grid.Column>
-                  <Form.Field>
-                    <label>Category</label>
-                    <Dropdown
-                      placeholder="Category1"
-                      fluid
-                      selection
-                      options={categoryOptions}
-                      value={category}
-                      onChange={(e, { value }) => setCategory(value)}
-                    />
-                  </Form.Field>
-                </Grid.Column>
+          </Form.Group>
 
-                <Grid.Column>
-                  <Form.Field required>
-                    <label>Price</label>
-                    <Input
-                      type="number"
-                      placeholder="50"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                    />
-                  </Form.Field>
-                </Grid.Column>
-              </Grid.Row>
+          {previewUrl && (
+            <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+              <Image src={previewUrl} size="medium" centered bordered />
+            </div>
+          )}
 
-              <Grid.Row>
-                <Grid.Column>
-                  <Form.Field>
-                    <label>In Stock Quantity</label>
-                    <Input
-                      type="number"
-                      placeholder="100"
-                      value={stock}
-                      onChange={(e) => setStock(e.target.value)}
-                    />
-                  </Form.Field>
-                </Grid.Column>
-
-                <Grid.Column>
-                  <Form.Field>
-                    <label>Add Image Link</label>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <Input
-                        placeholder="https://"
-                        value={imageLink}
-                        onChange={(e) => setImageLink(e.target.value)}
-                        style={{ marginRight: "0.5rem" }}
-                      />
-                      <Button
-                        icon="upload"
-                        onClick={() =>
-                          document.getElementById("fileInput").click()
-                        }
-                      />
-
-                      <input
-                        id="fileInput"
-                        type="file"
-                        style={{ display: "none" }}
-                        onChange={handleFileChange}
-                      />
-                    </div>
-                  </Form.Field>
-                </Grid.Column>
-              </Grid.Row>
-            </Grid>
-
-            {previewImage && (
-              <Segment
-                textAlign="center"
-                style={{
-                  marginTop: "1rem",
-                  border: "2px dashed #ccc",
-                  padding: "1rem",
-                }}
-              >
-                <Image
-                  src={previewImage}
-                  size="small"
-                  centered
-                  alt="Product preview"
-                />
-                <p style={{ marginTop: "0.5rem" }}>image preview!</p>
-              </Segment>
-            )}
-            <Button primary type="submit" style={{ marginTop: "1rem" }}>
+          <div style={{ textAlign: "center" }}>
+            <Button color="green" onClick={handleAddProduct}>
               Add Product
             </Button>
-          </Form>
-        </Segment>
-      </Container>
+          </div>
+        </Form>
+      </Segment>
       <Footer />
     </div>
   );

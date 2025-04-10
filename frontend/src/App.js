@@ -6,6 +6,7 @@ import PasswordReset from './pages/Auth/PasswordReset';
 import PasswordSucceed from './pages/Auth/PasswordSucceed';
 import ProductPage from "./pages/Product/ProductPage";
 import CreateProductPage from "./pages/Product/CreateProductPage";
+import EditProductPage from "./pages/Product/EditProductPage"
 import ProductDetailPage from "./pages/Product/ProductDetailPage";
 
 function App() {
@@ -16,8 +17,9 @@ function App() {
         <Route path="/p-reset" element={<PasswordReset />} />
         <Route path="/p-succeed" element={<PasswordSucceed />} />
         <Route path="/products" element={<ProductPage />} />
-        <Route path="/products/create-product" element={<CreateProductPage />} />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
+        <Route path="/product/create" element={<CreateProductPage />} />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route path="/product/:id/edit" element={<EditProductPage />} />
         <Route path="/error" element={<ErrorPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

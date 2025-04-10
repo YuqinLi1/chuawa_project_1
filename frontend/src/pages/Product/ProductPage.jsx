@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Dropdown, Button, Input, Icon } from "semantic-ui-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
@@ -8,6 +8,7 @@ import "../../App.css";
 
 function ProductPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOption, setSortOption] = useState("date");
@@ -16,7 +17,11 @@ function ProductPage() {
   const productsPerPage = 8;
 
   useEffect(() => {
-    fetchProducts();
+    if (location.state?.products) {
+      setProducts(location.state.products);
+    } else {
+      fetchProducts();
+    }
     axios
       .get("http://localhost:5000/api/auth/me", { withCredentials: true })
       .then((res) => {
@@ -25,7 +30,7 @@ function ProductPage() {
       .catch((err) => {
         console.error("Failed to fetch user role:", err);
       });
-  }, []);
+  }, [location.state]);
 
   const fetchProducts = () => {
     axios
@@ -41,12 +46,16 @@ function ProductPage() {
   };
 
   const handleSearch = () => {
-    if (!searchTerm) return;
+    if (!searchTerm.trim()) {
+      fetchProducts();
+      return;
+    }
     axios
-      .get(`http://localhost:5000/api/products?search=${searchTerm}`)
+      .get(`http://localhost:5000/api/products/search/${searchTerm}`)
       .then((res) => {
         if (res.data.success) {
-          setProducts(res.data.allProducts);
+          setProducts(res.data.products);
+          setCurrentPage(1);
         }
       })
       .catch((err) => {
@@ -66,6 +75,20 @@ function ProductPage() {
         console.error("Failed to delete product:", err);
       });
   };
+
+const handleImageClick = (name) => {
+  axios
+    .get(`http://localhost:5000/api/products/name/${name}`)
+    .then((res) => {
+      if (res.data.success && res.data.singleProd) {
+        const product = res.data.singleProd;
+        navigate(`/product/${product._id}`);
+      }
+    })
+    .catch((err) => {
+      console.error("Failed to load product details:", err);
+    });
+};
 
   const getSortedProducts = () => {
     let sorted = [...products];
@@ -88,21 +111,27 @@ function ProductPage() {
 
   return (
     <>
-      <HeaderBar showSearchBar={true} searchTerm={searchTerm} setSearchTerm={setSearchTerm} handleSearch={handleSearch} />
+      <HeaderBar
+        showSearchBar={true}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        handleSearch={handleSearch}
+      />
       <Container fluid className="products-page-container">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h4 className="m-0">Products</h4>
-          <Dropdown
-            selection
-            value={sortOption}
-            onChange={(e, { value }) => setSortOption(value)}
-            options={[
-              { key: "date", value: "date", text: "Sorted by date" },
-              { key: "low", value: "priceLow", text: "Price - Low to High" },
-              { key: "high", value: "priceHigh", text: "Price - High to Low" },
-            ]}
-            style={{ minWidth: "200px" }}
-          />
+          <div>
+            <Dropdown
+              className="products-sort"
+              value={sortOption}
+              onChange={(e, { value }) => setSortOption(value)}
+              options={[
+                { key: "date", text: "Sorted by date", value: "date" },
+                { key: "priceLow", text: "Sorted by price - Low to High", value: "priceLow" },
+                { key: "priceHigh", text: "Sorted by price - High to Low", value: "priceHigh" },
+              ]}
+            />
+          </div>
         </div>
 
         <div className="product-grid">
@@ -113,7 +142,7 @@ function ProductPage() {
                 alt={product.name}
                 className="product-image"
                 style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/product/${product._id}`)}
+                onClick={() => handleImageClick(product.name)}
               />
               <div className="product-name">{product.name}</div>
               <div className="product-price">${product.price}</div>
@@ -126,19 +155,50 @@ function ProductPage() {
                     <Button
                       size="tiny"
                       color="yellow"
-                      onClick={() => navigate(`/product/${product._id}/edit`)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="tiny"
-                      color="red"
-                      onClick={() => handleDelete(product._id)}
-                    >
-                      Delete
-                    </Button>
-                  </>
-                )}
+                      onClick={() => {
+                        axios
+                          .get(`http://localhost:5000/api/products/name/${product.name}`)
+                          .then((res) => {
+                          if (res.data.success && res.data.singleProd) {
+                          navigate(`/product/${res.data.singleProd._id}/edit`);
+                      }
+                  })
+                    .catch((err) => {
+                  console.error("Failed to fetch product for editing:", err);
+                });
+              }}
+              >
+            Edit
+          </Button>
+
+          <Button
+            size="tiny"
+            color="red"
+            onClick={() => {
+            axios
+                .get(`http://localhost:5000/api/products/name/${product.name}`)
+                .then((res) => {
+                    if (res.data.success && res.data.singleProd) {
+                    const id = res.data.singleProd._id;
+                      axios
+                      .delete(`http://localhost:5000/api/products/${id}`, {
+                      withCredentials: true,
+                  })
+                .then(() => fetchProducts())
+                .catch((err) => {
+                  console.error("Failed to delete product:", err);
+                });
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to fetch product for deletion:", err);
+              });
+            }}
+              >
+                Delete
+              </Button>
+              </>
+              )}
               </div>
             </div>
           ))}
