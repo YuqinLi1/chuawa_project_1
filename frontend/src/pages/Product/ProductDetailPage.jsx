@@ -57,21 +57,8 @@ function ProductDetailPage() {
 
   const handleAddCartClick = async () => {
     if (!product) return;
-
+  
     try {
-      // Check if user is logged in first
-      const userCheck = await api.get("/auth/me", { withCredentials: true });
-
-      if (!userCheck.data.user) {
-        setErrorMessage("Please log in to add items to cart");
-        return;
-      }
-
-      const productIdToSend = product._id.toString
-        ? product._id.toString()
-        : product._id;
-      console.log("Adding to cart, product ID:", productIdToSend);
-
       const response = await api.post(
         "/cart",
         {
@@ -80,39 +67,27 @@ function ProductDetailPage() {
         },
         { withCredentials: true }
       );
-
-      console.log("Cart response:", response.data); // Log successful response
+  
+      console.log("Cart response:", response.data);
       setCartMessage(`Added ${product.name} to cart!`);
       setErrorMessage("");
     } catch (err) {
       console.error("Error adding to cart:", err);
-
-      // Log detailed error information
+  
       if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error("Error response data:", err.response.data);
-        console.error("Error response status:", err.response.status);
-
         if (err.response.status === 401) {
           setErrorMessage("Please log in to add items to cart");
         } else {
           setErrorMessage(
-            `Failed to add product to cart: ${
-              err.response.data.message || "Unknown error"
-            }`
+            `Failed to add product to cart: ${err.response.data.message || "Unknown error"}`
           );
         }
       } else if (err.request) {
-        // The request was made but no response was received
-        console.error("No response received:", err.request);
         setErrorMessage("Server not responding. Please try again later.");
       } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error("Request setup error:", err.message);
         setErrorMessage(`Error: ${err.message}`);
       }
-
+  
       setCartMessage("");
     }
   };

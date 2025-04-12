@@ -37,7 +37,7 @@ function HeaderBar({ showSearchBar }) {
       .catch(() => {
         setUser(null);
       });
-  }, []);
+  }, [location.pathname]); 
 
   // Fetch cart when user changes
   useEffect(() => {

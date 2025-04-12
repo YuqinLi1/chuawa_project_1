@@ -34,8 +34,6 @@ const registerUser = asyncHandler(async (req, res) => {
       .status(200)
       .cookie("token", token, {
         httpOnly: true,
-        sameSite: "None",
-        secure: true,
         maxAge: 12 * 60 * 60 * 1000,
       })
       .json({ success: true, token, user: { email: newUser.email, role: newUser.role } });
@@ -80,8 +78,6 @@ const userLogin = asyncHandler(async (req, res) => {
       .status(200)
       .cookie("token", token, {
         expires: new Date(Date.now() + date1),
-        sameSite: "None",
-        secure: true,
       })
       .json({
         success: true,

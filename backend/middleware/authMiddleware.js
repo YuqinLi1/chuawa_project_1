@@ -5,49 +5,59 @@ const asyncHandler = require("express-async-handler");
 const userAuth = asyncHandler(async (req, res, next) => {
   let token;
 
-  if (req?.headers?.cookie && req.headers.cookie.includes("token=")) {
-    const tokenMatch = req.headers.cookie.match(/token=([^;]*)/);
-    if (tokenMatch && tokenMatch[1]) {
-      token = tokenMatch[1];
-    }
+  // Try to get token from cookie (requires cookie-parser middleware)
+  if (req.cookies?.token) {
+    token = req.cookies.token;
+  }
+
+  // Fallback to parsing manually from header
+  if (!token && req.headers?.cookie?.includes("token=")) {
+    const match = req.headers.cookie.match(/token=([^;]*)/);
+    if (match && match[1]) token = match[1];
+  }
+
+  // Fallback to token in header (if manually set)
+  if (!token) {
+    token = req.header("token");
   }
 
   if (!token) {
-    token = req?.header("token") || (req?.cookie && req.cookie.token);
+    return res.status(401).json({
+      success: false,
+      message: "No token, authorization denied",
+    });
   }
 
   try {
-    if (!token) {
+    // Decode token
+    const decoded = jwt.verify(token, process.env.APP_JWT_SECRET_KEY);
+
+    // Look up user
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
       return res.status(401).json({
-        message: "No entry without authentication!",
+        success: false,
+        message: "User not found",
       });
     }
 
-    const user = jwt.verify(token, process.env.APP_JWT_SECRET_KEY);
-
-    const userFound = await User.findById(user.id).select("-password");
-
-    if (!userFound) {
-      return res.status(401).json({
-        message: "User no longer exists",
-      });
-    }
-
-    req.user = userFound;
+    // Attach full user to req for access in routes
+    req.user = user;
     next();
-  } catch (error) {
-    console.error("Authentication error:", error);
+  } catch (err) {
+    console.error("Authentication error:", err.message);
     return res.status(401).json({
-      message: "Error at Authentication",
-      error: error.message,
+      success: false,
+      message: "Invalid token",
     });
   }
 });
 
 const checkAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
+  if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({ message: "Admin access only" });
   }
   next();
 };
+
 module.exports = { userAuth, checkAdmin };
