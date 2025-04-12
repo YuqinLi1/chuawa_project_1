@@ -9,11 +9,13 @@ import {
   Form,
   Input,
   TextArea,
-  Dropdown
+  Dropdown,
+  Container,
 } from "semantic-ui-react";
 import api from "../../services/api";
 import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
+import { useWindowSizeContext } from "../../contexts/WindowSizeContext";
 
 function CreateProductPage() {
   const [previewUrl, setPreviewUrl] = useState("");
@@ -27,6 +29,16 @@ function CreateProductPage() {
   });
 
   const navigate = useNavigate();
+  const windowSize = useWindowSizeContext();
+
+  const isMobile = windowSize.width < 768;
+
+  const categoryOptions = [
+    { key: "electronic", text: "Electronic", value: "electronic" },
+    { key: "daily", text: "Daily", value: "daily" },
+    { key: "grocery", text: "Grocery", value: "grocery" },
+    { key: "other", text: "Other", value: "other" },
+  ];
 
   const handleChange = (e, { name, value }) => {
     setProduct({ ...product, [name]: value });
@@ -64,96 +76,212 @@ function CreateProductPage() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
       <HeaderBar />
-      <Segment basic className="create-edit-product-page">
-        <Header as="h2" textAlign="center" style={{ marginBottom: "2rem" }}>
-          Create Product
-        </Header>
+      <Container style={{ padding: isMobile ? "1rem" : "2rem", flex: 1 }}>
+        <Segment basic className="create-edit-product-page">
+          <Header as="h2" textAlign="center" style={{ marginBottom: "2rem" }}>
+            Create Product
+          </Header>
 
-        <Form>
-          <Form.Field
-            control={TextArea}
-            label="Product Name"
-            name="name"
-            placeholder="Enter product name (max 100 words)"
-            maxLength={100}
-            value={product.name}
-            onChange={handleChange}
-          />
-
-          <Form.Field
-            control={TextArea}
-            label="Product Description"
-            name="description"
-            placeholder="Enter product description (max 500 words)"
-            rows={3}
-            maxLength={500}
-            value={product.description}
-            onChange={handleChange}
-          />
-
-          <Form.Group widths="equal">
-            <Form.Field
-              control={Dropdown}
-              label="Category"
-              name="category"
-              selection
-              options={[
-                { key: "electronic", text: "Electronic", value: "electronic" },
-                { key: "daily", text: "Daily", value: "daily" },
-                { key: "grocery", text: "Grocery", value: "grocery" },
-                { key: "other", text: "Other", value: "other" },
-              ]}
-              value={product.category}
-              onChange={handleChange}
-            />
-
-            <Form.Field
-              control={Input}
-              label="Price ($)"
-              type="number"
-              name="price"
-              value={product.price}
-              onChange={handleChange}
-            />
-          </Form.Group>
-
-          <Form.Group widths="equal">
-            <Form.Field
-              control={Input}
-              label="In Stock Quantity"
-              type="number"
-              name="stock"
-              value={product.stock}
-              onChange={handleChange}
-            />
-
-            <Form.Field width={10}>
-              <label>Add Image Link</label>
+          <Form>
+            <Form.Field>
+              <label>Product name</label>
               <Input
-                action={{ icon: "eye", onClick: handlePreview }}
-                placeholder="https://example.com/image.jpg"
-                name="imageUrl"
-                value={product.imageUrl}
+                placeholder="Enter product name"
+                name="name"
+                value={product.name}
                 onChange={handleChange}
               />
             </Form.Field>
-          </Form.Group>
 
-          {previewUrl && (
-            <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-              <Image src={previewUrl} size="medium" centered bordered />
+            <Form.Field>
+              <label>Product Description</label>
+              <TextArea
+                placeholder="Enter product description"
+                name="description"
+                rows={4}
+                value={product.description}
+                onChange={handleChange}
+              />
+            </Form.Field>
+
+            {isMobile ? (
+              // Mobile layout
+              <>
+                <Form.Field>
+                  <label>Category</label>
+                  <Dropdown
+                    selection
+                    options={categoryOptions}
+                    name="category"
+                    value={product.category}
+                    onChange={handleChange}
+                    placeholder="Select category"
+                  />
+                </Form.Field>
+
+                <Form.Field>
+                  <label>Price</label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    name="price"
+                    value={product.price}
+                    onChange={handleChange}
+                  />
+                </Form.Field>
+
+                <Form.Field>
+                  <label>In Stock Quantity</label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    name="stock"
+                    value={product.stock}
+                    onChange={handleChange}
+                  />
+                </Form.Field>
+
+                <Form.Field>
+                  <label>Add Image Link</label>
+                  <div style={{ display: "flex" }}>
+                    <Input
+                      placeholder="http://"
+                      name="imageUrl"
+                      value={product.imageUrl}
+                      onChange={handleChange}
+                      style={{ flex: 1 }}
+                    />
+                    <Button
+                      primary
+                      onClick={handlePreview}
+                      style={{ marginLeft: "0.5rem" }}
+                    >
+                      Upload
+                    </Button>
+                  </div>
+                </Form.Field>
+              </>
+            ) : (
+              // Desktop layout
+              <>
+                <Form.Group widths="equal">
+                  <Form.Field>
+                    <label>Category</label>
+                    <Dropdown
+                      selection
+                      options={categoryOptions}
+                      name="category"
+                      value={product.category}
+                      onChange={handleChange}
+                      placeholder="Select category"
+                    />
+                  </Form.Field>
+
+                  <Form.Field>
+                    <label>Price</label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      name="price"
+                      value={product.price}
+                      onChange={handleChange}
+                    />
+                  </Form.Field>
+                </Form.Group>
+
+                <Form.Group widths="equal">
+                  <Form.Field>
+                    <label>In Stock Quantity</label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      name="stock"
+                      value={product.stock}
+                      onChange={handleChange}
+                    />
+                  </Form.Field>
+
+                  <Form.Field>
+                    <label>Add Image Link</label>
+                    <div style={{ display: "flex" }}>
+                      <Input
+                        placeholder="http://"
+                        name="imageUrl"
+                        value={product.imageUrl}
+                        onChange={handleChange}
+                        style={{ flex: 1 }}
+                      />
+                      <Button
+                        primary
+                        onClick={handlePreview}
+                        style={{ marginLeft: "0.5rem" }}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                  </Form.Field>
+                </Form.Group>
+              </>
+            )}
+
+            {previewUrl && (
+              <div
+                style={{
+                  textAlign: "center",
+                  margin: "1.5rem 0",
+                  border: "1px solid #ddd",
+                  padding: "1rem",
+                  borderRadius: "4px",
+                }}
+              >
+                <p style={{ marginBottom: "0.5rem", color: "#666" }}>
+                  Image preview!
+                </p>
+                <Image src={previewUrl} size="medium" centered />
+              </div>
+            )}
+
+            {!previewUrl && (
+              <div
+                style={{
+                  textAlign: "center",
+                  margin: "1.5rem 0",
+                  border: "1px solid #ddd",
+                  padding: "1rem",
+                  borderRadius: "4px",
+                  height: "150px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "#999",
+                }}
+              >
+                <div style={{ fontSize: "40px", marginBottom: "10px" }}>📷</div>
+                <p>Image preview!</p>
+              </div>
+            )}
+
+            <div style={{ textAlign: "center", marginTop: "2rem" }}>
+              <Button
+                primary
+                onClick={handleAddProduct}
+                style={{
+                  backgroundColor: "#5829e3",
+                  color: "white",
+                  padding: isMobile ? "12px 24px" : "12px 32px",
+                }}
+              >
+                Add Product
+              </Button>
             </div>
-          )}
-
-          <div style={{ textAlign: "center" }}>
-            <Button color="green" onClick={handleAddProduct}>
-              Add Product
-            </Button>
-          </div>
-        </Form>
-      </Segment>
+          </Form>
+        </Segment>
+      </Container>
       <Footer />
     </div>
   );

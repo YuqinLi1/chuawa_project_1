@@ -8,7 +8,7 @@ import Footer from "../../components/Footer";
 const ErrorPage = () => {
   const navigate = useNavigate();
   const { width } = useWindowSize();
-  const isMobile = width < 600;
+  const isMobile = width < 768;
 
   const cartItems = [];
   const totalPrice = 0;

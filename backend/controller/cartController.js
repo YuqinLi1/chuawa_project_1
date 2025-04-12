@@ -3,10 +3,10 @@ const Product = require("../models/productModel");
 const mongoose = require("mongoose");
 
 const getCart = async (req, res) => {
-  console.log("step 10 "+req.body);
-  console.log("step 11 "+req.user);
+  console.log("step 10 " + req.body);
+  console.log("step 11 " + req.user);
   try {
-    const cart = await Cart.findOne({ user: req.user.userId }).populate(
+    const cart = await Cart.findOne({ user: req.user._id }).populate(
       "items.product",
       "name price stock image1"
     );
@@ -27,17 +27,17 @@ const getCart = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
-    console.log("step 1", req.body); 
-    console.log("step 2", req.user); 
+    console.log("step 1", req.body);
+    console.log("step 2", req.user);
 
     // Find or create a cart for the user
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
-      cart = new Cart({ user: req.user.userId, items: [] });
+      cart = new Cart({ user: req.user._id, items: [] });
     }
-    console.log("step3 "+cart);
-    cart.user = req.user._id;
-    console.log("step4 "+cart)
+    console.log("step3 " + cart);
+    // cart.user = req.user._id;
+    console.log("step4 " + cart);
 
     // Validate the product exists
     const product = await Product.findById(productId);
@@ -47,7 +47,7 @@ const addToCart = async (req, res) => {
         message: "Product not found",
       });
     }
-    console.log("step5 "+product);
+    console.log("step5 " + product);
 
     // Check if product already in cart
     const itemIndex = cart.items.findIndex(
@@ -71,7 +71,7 @@ const addToCart = async (req, res) => {
       "items.product",
       "name price stock image1"
     );
-console.log("step9");
+    console.log("step9");
     res.json({
       success: true,
       message: "Product added to cart",
@@ -95,7 +95,7 @@ const updateCartItem = async (req, res) => {
     console.log("New quantity:", quantity);
 
     // Find user's cart
-    const cart = await Cart.findOne({ user: req.user.userId });
+    const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       return res.status(404).json({
         success: false,
@@ -144,7 +144,7 @@ const removeCartItem = async (req, res) => {
 
     console.log("Removing cart item - Item ID:", cartItemId);
 
-    const cart = await Cart.findOne({ user: req.user.userId });
+    const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       return res.status(404).json({
         success: false,

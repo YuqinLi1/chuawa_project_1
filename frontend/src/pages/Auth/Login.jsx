@@ -4,10 +4,14 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
+import { useWindowSizeContext } from "../../contexts/WindowSizeContext";
 import "../../App.css";
 
 function Login() {
   const navigate = useNavigate();
+  const windowSize = useWindowSizeContext();
+  const isMobile = windowSize.width < 768;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -66,10 +70,22 @@ function Login() {
   };
 
   return (
-    <>
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
       <HeaderBar />
       <Container className="page-container d-flex justify-content-center align-items-center">
-        <div className="login-box">
+        <div
+          style={{
+            width: isMobile ? "100%" : "400px",
+            maxWidth: "100%",
+            backgroundColor: "white",
+            borderRadius: "8px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            padding: "2rem",
+            position: "relative",
+          }}
+        >
           <h4 className="text-center mb-3">Sign in to your account</h4>
 
           {serverError && (
@@ -86,7 +102,9 @@ function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              {emailError && <div className="text-danger mt-1">{emailError}</div>}
+              {emailError && (
+                <div className="text-danger mt-1">{emailError}</div>
+              )}
             </Form.Field>
 
             <Form.Field className="mb-2 position-relative">
@@ -130,7 +148,7 @@ function Login() {
         </div>
       </Container>
       <Footer />
-    </>
+    </div>
   );
 }
 

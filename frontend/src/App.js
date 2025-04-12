@@ -8,9 +8,11 @@ import ProductPage from "./pages/Product/ProductPage";
 import CreateProductPage from "./pages/Product/CreateProductPage";
 import EditProductPage from "./pages/Product/EditProductPage"
 import ProductDetailPage from "./pages/Product/ProductDetailPage";
+import { WindowSizeProvider } from "./contexts/WindowSizeContext";
 
 function App() {
   return (
+    <WindowSizeProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
@@ -23,6 +25,7 @@ function App() {
         <Route path="/error" element={<ErrorPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </WindowSizeProvider>
   );
 }
 
