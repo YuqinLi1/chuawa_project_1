@@ -65,6 +65,14 @@ function HeaderBar({ showSearchBar }) {
     setTotalPrice(total);
   }, [cartItems]);
 
+  // ✅ Allow other components to trigger a cart refresh
+  useEffect(() => {
+    const handleRefreshCart = () => fetchCartItems();
+    window.addEventListener("refresh-cart", handleRefreshCart);
+    return () => window.removeEventListener("refresh-cart", handleRefreshCart);
+  }, []);
+
+
   const fetchCartItems = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/cart", {
@@ -178,7 +186,9 @@ function HeaderBar({ showSearchBar }) {
         <Menu.Menu position="right">
           {/* User menu item */}
           {!user ? (
-            <Menu.Item style={{ color: "#ccc" }}>
+            <Menu.Item 
+              onClick={() => navigate("/login")}
+              style={{ color: "#ccc" }}>
               <Icon name="user" />
               Sign In
             </Menu.Item>

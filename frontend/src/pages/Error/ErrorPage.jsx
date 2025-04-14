@@ -50,7 +50,7 @@ const ErrorPage = () => {
         <Header as="h1" style={{ marginTop: "1rem" }}>
           Oops, something went wrong!
         </Header>
-        <Button primary onClick={() => navigate("/")}>
+        <Button primary onClick={() => navigate("/products")}>
           Go Home
         </Button>
       </Container>

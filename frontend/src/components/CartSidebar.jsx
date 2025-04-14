@@ -114,7 +114,7 @@ function CartSidebar({
               >
                 <Image
                   src={
-                    item.product.image1 ||
+                    item.product.imageUrl ||
                     "https://via.placeholder.com/60?text=No+Image"
                   }
                   size="tiny"

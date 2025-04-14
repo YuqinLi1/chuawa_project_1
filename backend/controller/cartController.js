@@ -8,7 +8,7 @@ const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.user._id }).populate(
       "items.product",
-      "name price stock image1"
+      "name price stock imageUrl"
     );
     if (!cart) {
       return res.json({ items: [] }); // cart is not found
@@ -69,7 +69,7 @@ const addToCart = async (req, res) => {
     // Re-fetch the cart with product details
     const updatedCart = await Cart.findById(cart._id).populate(
       "items.product",
-      "name price stock image1"
+      "name price stock imageUrl"
     );
     console.log("step9");
     res.json({
@@ -121,7 +121,7 @@ const updateCartItem = async (req, res) => {
 
     const updatedCart = await Cart.findById(cart._id).populate(
       "items.product",
-      "name price stock image1"
+      "name price stock image"
     );
 
     res.json({
@@ -170,7 +170,7 @@ const removeCartItem = async (req, res) => {
 
     const updatedCart = await Cart.findById(cart._id).populate(
       "items.product",
-      "name price stock image1"
+      "name price stock image"
     );
 
     res.json({

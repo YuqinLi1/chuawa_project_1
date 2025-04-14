@@ -8,7 +8,7 @@ const ProductSchema = new mongoose.Schema(
     description: String,
     stock: Number,
     category: String,
-    image1: String,
+    imageUrl: String,
   },
   { collection: "products", timestamps: true }
 );

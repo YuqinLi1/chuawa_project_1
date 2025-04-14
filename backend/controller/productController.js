@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 
 //create product
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, stock, category, image} = req.body;
+  const { name, price, description, stock, category, imageUrl} = req.body;
 
   try {
     const newProduct = await Product.create({
@@ -14,7 +14,7 @@ const createProduct = asyncHandler(async (req, res) => {
       description,
       stock,
       category,
-      image,
+      imageUrl,
     });
 
     res.status(200).json({
@@ -90,10 +90,10 @@ const fetchSingleProd = asyncHandler(async (req, res) => {
 });
 
 const searchProduct = asyncHandler(async (req, res) => {
-  const keyword = req.params.keyword?.trim();
+  const keyword = req.params.keyword?.trim().toLowerCase();
 
   let query = {};
-  if (keyword && keyword !== "") {
+  if (keyword && keyword !== "" && keyword !== "all") {
     query = {
       $or: [
         { name: { $regex: keyword, $options: "i" } },
@@ -146,11 +146,11 @@ const updateProduct = asyncHandler(async (req, res) => {
     };
     // if file exists
     if (req.file) {
-      updateData.image1 = req.file.path;
+      updateData.imageUrl = req.file.path;
     }
     const updatedProd = await Product.findByIdAndUpdate(id, updateData, {
       new: true,
-    }).populate("user");
+    });
     res.status(200).json(updatedProd);
   } catch (error) {
     res.status(401).json({

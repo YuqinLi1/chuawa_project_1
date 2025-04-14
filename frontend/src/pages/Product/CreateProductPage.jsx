@@ -62,7 +62,7 @@ function CreateProductPage() {
           category: product.category,
           price: parseFloat(product.price),
           stock: parseInt(product.stock),
-          image1: product.imageUrl,
+          imageUrl: product.imageUrl,
         },
         { withCredentials: true }
       );

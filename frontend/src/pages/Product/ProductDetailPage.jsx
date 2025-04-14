@@ -76,9 +76,9 @@ function ProductDetailPage() {
       console.log("Cart response:", response.data);
       setCartMessage(`Added ${product.name} to cart!`);
       setErrorMessage("");
+      window.dispatchEvent(new Event("refresh-cart"));
     } catch (err) {
       console.error("Error adding to cart:", err);
-
       if (err.response) {
         if (err.response.status === 401) {
           setErrorMessage("Please log in to add items to cart");
@@ -94,85 +94,26 @@ function ProductDetailPage() {
       } else {
         setErrorMessage(`Error: ${err.message}`);
       }
-
       setCartMessage("");
     }
   };
 
-  if (loading) {
-    return (
-      <div
-        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-      >
-        <HeaderBar />
-        <Loader active inline="centered">
-          Loading product...
-        </Loader>
-        <div style={{ marginTop: "auto" }}>
-          <Footer />
-        </div>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div
-        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-      >
-        <HeaderBar />
-        <Message negative>No product found.</Message>
-        <div style={{ marginTop: "auto" }}>
-          <Footer />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-    >
+    <div className="product-detail-page">
       <HeaderBar />
-      <Container
-        style={{
-          flex: 1,
-          padding: isMobile ? "1rem 0" : "2rem 0",
-          maxWidth: "1200px",
-        }}
-      >
-        <Header as="h2" style={{ marginBottom: "1.5rem" }}>
+      <Container className="product-detail-container">
+        <Header as="h2" className="product-detail-title">
           Products Detail
         </Header>
 
         <Grid stackable>
           <Grid.Row>
             <Grid.Column width={8}>
-              <div
-                style={{
-                  backgroundColor: "#f9f9f9",
-                  borderRadius: "8px",
-                  padding: "2rem",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "100%",
-                  minHeight: "400px",
-                }}
-              >
-                {product.image1 ? (
-                  <Image src={product.image1} size="large" centered />
+              <div className="product-detail-image-box">
+                {product?.imageUrl ? (
+                  <Image src={product.imageUrl} size="large" centered />
                 ) : (
-                  <div
-                    style={{
-                      height: "300px",
-                      width: "100%",
-                      backgroundColor: "#f0f0f0",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
+                  <div className="product-detail-placeholder">
                     No image available
                   </div>
                 )}
@@ -180,118 +121,60 @@ function ProductDetailPage() {
             </Grid.Column>
 
             <Grid.Column width={8}>
-              <div style={{ padding: isMobile ? "1rem 0" : "0 1rem" }}>
-                <div
-                  style={{
-                    color: "#666",
-                    marginBottom: "0.5rem",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  {product.category || "Category1"}
+              <div className="product-detail-info">
+                <div className="details-category">
+                  {product?.category || "Category1"}
                 </div>
 
-                <Header
-                  as="h2"
-                  style={{
-                    margin: "0 0 1rem 0",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {product.name}
+                <Header as="h2" className="details-name">
+                  {product?.name}
                 </Header>
 
-                <div
-                  style={{
-                    fontSize: "1.5rem",
-                    fontWeight: "bold",
-                    marginBottom: "1rem",
-                    color: "#333",
-                  }}
-                >
-                  ${product.price.toFixed(2)}
-                  {product.originalPrice &&
-                    product.originalPrice > product.price && (
-                      <span
-                        style={{
-                          fontSize: "1rem",
-                          color: "#888",
-                          textDecoration: "line-through",
-                          marginLeft: "0.5rem",
-                        }}
-                      >
-                        ${product.originalPrice.toFixed(2)}
-                      </span>
-                    )}
+                <div className="details-price">
+                  {product?.price && `$${product.price.toFixed(2)}`}
+                  {product?.originalPrice > product?.price && (
+                    <span className="original-price">
+                      ${product.originalPrice.toFixed(2)}
+                    </span>
+                  )}
                 </div>
 
                 <Divider />
 
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <p
-                    style={{
-                      lineHeight: "1.6",
-                      color: "#555",
-                    }}
-                  >
-                    {product.description ||
-                      "Hundreds of VR games, one-of-a-kind experiences, live events, new ways to stay fit and a growing community of users. Experience the best of VR with an ever-expanding universe of games."}
-                  </p>
+                <div className="details-description">
+                  <p>{product?.description}</p>
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: isMobile ? "column" : "row",
-                    gap: "1rem",
-                    marginTop: "2rem",
-                  }}
-                >
-                  <Button
-                    primary
-                    size="large"
-                    onClick={handleAddCartClick}
-                    disabled={product.stock === 0}
-                    style={{
-                      backgroundColor: "#5829e3",
-                      flex: isMobile ? "1" : "0 0 auto",
-                    }}
-                  >
-                    Add To Cart
-                  </Button>
+                <div className="product-detail-controls">
+                  <div>
+                    {product?.stock === 0 ? (
+                      <Label color="red">Out of Stock</Label>
+                    ) : (
+                      <Label color="green">In Stock : {product?.stock}</Label>
+                    )}
+                  </div>
 
-                  {userRole === "admin" && (
+                  <div className="product-detail-buttons">
                     <Button
+                      primary
                       size="large"
-                      onClick={() => navigate(`/product/${product._id}/edit`)}
-                      style={{ flex: isMobile ? "1" : "0 0 auto" }}
+                      onClick={handleAddCartClick}
+                      disabled={product?.stock === 0}
+                      style={{ backgroundColor: "#5829e3" }}
                     >
-                      Edit
+                      Add To Cart
                     </Button>
-                  )}
+
+                    {userRole === "admin" && (
+                      <Button
+                        size="large"
+                        onClick={() => navigate(`/product/${product?._id}/edit`)}
+                      >
+                        Edit
+                      </Button>
+                    )}
+                  </div>
                 </div>
-
-                {product.stock === 0 ? (
-                  <Label
-                    color="red"
-                    style={{ marginTop: "1rem", display: "inline-block" }}
-                  >
-                    Out of Stock
-                  </Label>
-                ) : (
-                  <Label
-                    color="green"
-                    style={{ marginTop: "1rem", display: "inline-block" }}
-                  >
-                    In Stock
-                  </Label>
-                )}
-
-                {cartMessage && (
-                  <Message positive style={{ marginTop: "1rem" }}>
-                    {cartMessage}
-                  </Message>
-                )}
 
                 {errorMessage && (
                   <Message negative style={{ marginTop: "1rem" }}>

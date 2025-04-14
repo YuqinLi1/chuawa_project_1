@@ -101,13 +101,14 @@ const userPasswordUpdate = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(userId);
+  console.log("step1 "+user);
 
   if (!user || user.email !== email) {
     return res.status(400).json({ message: "Invalid user ID or email mismatch." });
   }
 
   user.password = newPassword;
-  await user.save();
+  await user.save({ validateBeforeSave: false });
 
   res.status(200).json({ message: "Password updated successfully." });
 });

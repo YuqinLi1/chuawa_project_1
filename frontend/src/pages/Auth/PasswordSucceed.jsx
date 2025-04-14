@@ -12,46 +12,20 @@ function PasswordSucceed() {
   const isMobile = windowSize.width < 768;
 
   return (
-    <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-    >
+    <div className="page-container">
       <HeaderBar />
-      <Container className="page-container d-flex justify-content-center align-items-center">
-        <div
-          style={{
-            width: isMobile ? "100%" : "400px",
-            maxWidth: "100%",
-            backgroundColor: "white",
-            borderRadius: "8px",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-            padding: "2rem",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "4rem",
-              color: "#5829e3",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <Icon name="check circle outline" />
-          </div>
-
-          <h2 style={{ marginBottom: "1rem" }}>Success!</h2>
-          <p className="mt-3">
-            We already changed your password. Please log in again.
-          </p>
-          <Button
+      <div className="layout-wrapper">
+      <div className="login-box">
+      <h2 className="text-center mb-5">Success!</h2>
+      <h4 className="text-center mb-3"> We already changed your password. Please log in again.</h4>
+      <Button
             className="login-button mt-3"
             onClick={() => navigate("/login")}
-            fluid
           >
-            Log In
-          </Button>
-        </div>
-      </Container>
-      <Footer />
+          Log In
+      </Button>
+      </div>
+      </div>
     </div>
   );
 }

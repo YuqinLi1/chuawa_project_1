@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Segment,
   Form,
@@ -11,6 +11,8 @@ import {
   TextArea,
   Dropdown,
 } from "semantic-ui-react";
+import api from "../../services/api";
+import { useNavigate, useParams } from "react-router-dom";
 import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
 import { useWindowSizeContext } from "../../contexts/WindowSizeContext";
@@ -20,12 +22,13 @@ function EditProductPage() {
   const [product, setProduct] = useState({
     name: "",
     description: "",
-    category: "electronic",
+    category: "",
     price: "",
     stock: "",
     imageUrl: "",
   });
-
+  const { id } = useParams();
+  const navigate = useNavigate();
   const windowSize = useWindowSizeContext();
   const isMobile = windowSize.width < 768;
 
@@ -48,9 +51,31 @@ function EditProductPage() {
     }
   };
 
-  const handleUpdateProduct = () => {
-    console.log("Product update:", product);
-    alert("Product update successfully!");
+  const handleUpdateProduct = async () => {
+    try {
+      const updateFields = {};
+      Object.keys(product).forEach((key) => {
+        if (product[key]) {
+          if (key === "price") {
+            updateFields[key] = parseFloat(product[key]);
+          } else if (key === "stock") {
+            updateFields[key] = parseInt(product[key]);
+          } else {
+            updateFields[key] = product[key];
+          }
+        }
+      });
+
+      await api.put(`/products/${id}`, updateFields, {
+        withCredentials: true,
+      });
+
+      alert("Product updated successfully!");
+      navigate("/products");
+    } catch (error) {
+      console.error("Failed to update product:", error);
+      alert("Failed to update product.");
+    }
   };
 
   return (
