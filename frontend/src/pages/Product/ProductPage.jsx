@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Dropdown, Button, Image, Icon } from "semantic-ui-react";
+import { Container, Dropdown, Button, Image } from "semantic-ui-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import HeaderBar from "../../components/HeaderBar";
@@ -312,8 +312,8 @@ function ProductPage() {
                       justifyContent: "space-between",
                     }}
                   >
-                    <div>
-                      {userRole && (
+                    {userRole && (
+                      <>
                         <Button
                           primary
                           style={{ backgroundColor: "#5829e3" }}
@@ -324,14 +324,26 @@ function ProductPage() {
                         >
                           Add
                         </Button>
-                      )}
-                    </div>
 
-                    <div>
-                      <Button basic onClick={() => handleEdit(product._id)}>
-                        Edit
-                      </Button>
-                    </div>
+                        {userRole === "admin" && (
+                          <>
+                            <Button
+                              basic
+                              onClick={() => handleEdit(product._id)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              basic
+                              color="red"
+                              onClick={() => handleDelete(product._id)}
+                            >
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -418,9 +430,18 @@ function ProductPage() {
                     </Button>
 
                     {userRole === "admin" && (
-                      <Button basic onClick={() => handleEdit(product._id)}>
-                        Edit
-                      </Button>
+                      <>
+                        <Button basic onClick={() => handleEdit(product._id)}>
+                          Edit
+                        </Button>
+                        <Button
+                          basic
+                          color="red"
+                          onClick={() => handleDelete(product._id)}
+                        >
+                          Delete
+                        </Button>
+                      </>
                     )}
                   </div>
                 </div>
