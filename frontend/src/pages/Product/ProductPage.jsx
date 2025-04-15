@@ -263,7 +263,11 @@ function ProductPage() {
                 }}
               >
                 <div
-                  style={{ cursor: "pointer" }}
+                  style={{
+                    cursor: "pointer",
+                    height: "200px",
+                    overflow: "hidden",
+                  }}
                   onClick={() => handleImageClick(product.name)}
                 >
                   <Image
@@ -273,7 +277,11 @@ function ProductPage() {
                       "https://via.placeholder.com/300x300?text=No+Image"
                     }
                     fluid
-                    style={{ width: "100%", height: "auto" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 </div>
 
@@ -283,6 +291,12 @@ function ProductPage() {
                       color: "#666",
                       fontSize: "0.9rem",
                       marginBottom: "0.25rem",
+                      height: "2.8em",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
                     }}
                   >
                     {product.name}
@@ -309,6 +323,7 @@ function ProductPage() {
                   <div
                     style={{
                       display: "flex",
+                      gap: "0.5rem",
                       justifyContent: "space-between",
                     }}
                   >
@@ -316,7 +331,12 @@ function ProductPage() {
                       <>
                         <Button
                           primary
-                          style={{ backgroundColor: "#5829e3" }}
+                          style={{
+                            backgroundColor: "#5829e3",
+                            flex: 1,
+                            minWidth: "60px",
+                            margin: 0,
+                          }}
                           onClick={() =>
                             handleAddCartClick(product._id, product.name)
                           }
@@ -329,6 +349,11 @@ function ProductPage() {
                           <>
                             <Button
                               basic
+                              style={{
+                                flex: 1,
+                                minWidth: "60px",
+                                margin: 0,
+                              }}
                               onClick={() => handleEdit(product._id)}
                             >
                               Edit
@@ -336,6 +361,11 @@ function ProductPage() {
                             <Button
                               basic
                               color="red"
+                              style={{
+                                flex: 1,
+                                minWidth: "60px",
+                                margin: 0,
+                              }}
                               onClick={() => handleDelete(product._id)}
                             >
                               Delete
@@ -365,10 +395,17 @@ function ProductPage() {
                   border: "1px solid #eee",
                   borderRadius: "8px",
                   overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
                 }}
               >
                 <div
-                  style={{ cursor: "pointer" }}
+                  style={{
+                    cursor: "pointer",
+                    height: "200px",
+                    overflow: "hidden",
+                  }}
                   onClick={() => handleImageClick(product.name)}
                 >
                   <Image
@@ -377,16 +414,33 @@ function ProductPage() {
                       product.image1 ||
                       "https://via.placeholder.com/300x300?text=No+Image"
                     }
-                    fluid
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 </div>
 
-                <div style={{ padding: "1rem" }}>
+                <div
+                  style={{
+                    padding: "1rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: "1 0 auto",
+                  }}
+                >
                   <div
                     style={{
                       color: "#666",
                       fontSize: "0.9rem",
                       marginBottom: "0.25rem",
+                      height: "2.8em",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
                     }}
                   >
                     {product.name}
@@ -412,16 +466,25 @@ function ProductPage() {
                     stock:{product.stock}
                   </div>
 
+                  <div style={{ flex: "1 0 auto" }}></div>
+
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
+                      gap: "0.5rem",
+                      marginTop: "auto",
                     }}
                   >
                     {userRole && (
                       <Button
                         primary
-                        style={{ backgroundColor: "#5829e3" }}
+                        style={{
+                          backgroundColor: "#5829e3",
+                          flex: 1,
+                          minWidth: "60px",
+                          margin: 0,
+                        }}
                         onClick={() =>
                           handleAddCartClick(product._id, product.name)
                         }
@@ -439,6 +502,10 @@ function ProductPage() {
                         <Button
                           basic
                           color="red"
+                          style={{
+                            minWidth: "60px",
+                            margin: 0,
+                          }}
                           onClick={() => handleDelete(product._id)}
                         >
                           Delete
