@@ -121,9 +121,9 @@ function ProductPage() {
       });
   };
 
-  const handleEdit = (name) => {
+  const handleEdit = (id) => {
     axios
-      .get(`http://localhost:5000/api/products/name/${name}`)
+      .get(`http://localhost:5000/api/products/${id}`)
       .then((res) => {
         if (res.data.success && res.data.singleProd) {
           navigate(`/product/${res.data.singleProd._id}/edit`);
@@ -328,14 +328,7 @@ function ProductPage() {
                     </div>
 
                     <div>
-                      <Button
-                        basic
-                        as="a"
-                        href="#"
-                        onClick={() =>
-                          (window.location = `mailto:?subject=Check out this product&body=I found this amazing product: ${product.name}`)
-                        }
-                      >
+                      <Button basic onClick={() => handleEdit(product._id)}>
                         Edit
                       </Button>
                     </div>
@@ -425,7 +418,7 @@ function ProductPage() {
                     </Button>
 
                     {userRole === "admin" && (
-                      <Button basic onClick={() => handleEdit(product.name)}>
+                      <Button basic onClick={() => handleEdit(product._id)}>
                         Edit
                       </Button>
                     )}
