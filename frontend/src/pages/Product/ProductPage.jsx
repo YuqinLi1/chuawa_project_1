@@ -418,16 +418,18 @@ function ProductPage() {
                       justifyContent: "space-between",
                     }}
                   >
-                    <Button
-                      primary
-                      style={{ backgroundColor: "#5829e3" }}
-                      onClick={() =>
-                        handleAddCartClick(product._id, product.name)
-                      }
-                      disabled={product.stock === 0}
-                    >
-                      Add
-                    </Button>
+                    {userRole && (
+                      <Button
+                        primary
+                        style={{ backgroundColor: "#5829e3" }}
+                        onClick={() =>
+                          handleAddCartClick(product._id, product.name)
+                        }
+                        disabled={product.stock === 0}
+                      >
+                        Add
+                      </Button>
+                    )}
 
                     {userRole === "admin" && (
                       <>
