@@ -18,6 +18,7 @@ function CartSidebar({
   onClose,
   cartItems,
   totalPrice,
+  discount,
   promoCode,
   setPromoCode,
   handleApplyPromo,
@@ -28,12 +29,10 @@ function CartSidebar({
   const windowSize = useWindowSizeContext();
   const isMobile = windowSize.width < 768;
 
+  const subtotalAfterDiscount = totalPrice - discount;
   const taxRate = 0.1;
-  const tax = (totalPrice * taxRate).toFixed(2);
-
-  const discount = 20.0;
-
-  const estimatedTotal = (totalPrice + Number(tax) - discount).toFixed(2);
+  const tax = (subtotalAfterDiscount * taxRate).toFixed(2);
+  const estimatedTotal = (subtotalAfterDiscount + Number(tax)).toFixed(2);
 
   const handleCheckout = () => {
     onClose();
@@ -247,12 +246,14 @@ function CartSidebar({
                   <span>Tax</span>
                   <span>${tax}</span>
                 </div>
+                {/* discount show */}
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
                     marginBottom: "0.75rem",
-                    color: "#5829e3",
+                    // only show when discount
+                    color: discount > 0 ? "#5829e3" : "inherit",
                   }}
                 >
                   <span>Discount</span>

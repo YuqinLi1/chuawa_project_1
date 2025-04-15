@@ -99,93 +99,216 @@ function ProductDetailPage() {
   };
 
   return (
-    <div className="product-detail-page">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <HeaderBar />
-      <Container className="product-detail-container">
-        <Header as="h2" className="product-detail-title">
-          Products Detail
-        </Header>
 
-        <Grid stackable>
-          <Grid.Row>
-            <Grid.Column width={8}>
-              <div className="product-detail-image-box">
-                {product?.imageUrl ? (
-                  <Image src={product.imageUrl} size="large" centered />
-                ) : (
-                  <div className="product-detail-placeholder">
-                    No image available
-                  </div>
-                )}
-              </div>
-            </Grid.Column>
+      <div style={{ flex: "1 0 auto" }}>
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "3rem 0",
+            }}
+          >
+            <Loader active size="large">
+              Loading product...
+            </Loader>
+          </div>
+        ) : !product ? (
+          <Container style={{ padding: "2rem 0" }}>
+            <Message negative>
+              <Message.Header>No product found</Message.Header>
+              <p>
+                The product you're looking for doesn't exist or has been
+                removed.
+              </p>
+              <Button onClick={() => navigate("/products")}>
+                Back to Products
+              </Button>
+            </Message>
+          </Container>
+        ) : (
+          <Container
+            style={{
+              padding: isMobile ? "1rem" : "2rem 0",
+              maxWidth: isMobile ? "100%" : "1200px",
+            }}
+          >
+            <Header as="h2" style={{ marginBottom: "1.5rem" }}>
+              Products Detail
+            </Header>
 
-            <Grid.Column width={8}>
-              <div className="product-detail-info">
-                <div className="details-category">
-                  {product?.category || "Category1"}
-                </div>
-
-                <Header as="h2" className="details-name">
-                  {product?.name}
-                </Header>
-
-                <div className="details-price">
-                  {product?.price && `$${product.price.toFixed(2)}`}
-                  {product?.originalPrice > product?.price && (
-                    <span className="original-price">
-                      ${product.originalPrice.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-
-                <Divider />
-
-                <div className="details-description">
-                  <p>{product?.description}</p>
-                </div>
-
-                <div className="product-detail-controls">
-                  <div>
-                    {product?.stock === 0 ? (
-                      <Label color="red">Out of Stock</Label>
+            <Grid stackable>
+              <Grid.Row>
+                <Grid.Column
+                  width={isMobile ? 16 : 8}
+                  style={{ marginBottom: isMobile ? "1.5rem" : 0 }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: "#f9f9f9",
+                      borderRadius: "8px",
+                      padding: "2rem",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "100%",
+                      minHeight: isMobile ? "300px" : "400px",
+                    }}
+                  >
+                    {product.imageUrl ? (
+                      <Image src={product.imageUrl} size="large" centered />
                     ) : (
-                      <Label color="green">In Stock : {product?.stock}</Label>
-                    )}
-                  </div>
-
-                  <div className="product-detail-buttons">
-                    <Button
-                      primary
-                      size="large"
-                      onClick={handleAddCartClick}
-                      disabled={product?.stock === 0}
-                      style={{ backgroundColor: "#5829e3" }}
-                    >
-                      Add To Cart
-                    </Button>
-
-                    {userRole === "admin" && (
-                      <Button
-                        size="large"
-                        onClick={() => navigate(`/product/${product?._id}/edit`)}
+                      <div
+                        style={{
+                          height: "300px",
+                          width: "100%",
+                          backgroundColor: "#f0f0f0",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
                       >
-                        Edit
-                      </Button>
+                        No image available
+                      </div>
                     )}
                   </div>
-                </div>
+                </Grid.Column>
 
-                {errorMessage && (
-                  <Message negative style={{ marginTop: "1rem" }}>
-                    {errorMessage}
-                  </Message>
-                )}
-              </div>
-            </Grid.Column>
-          </Grid.Row>
-        </Grid>
-      </Container>
+                <Grid.Column width={isMobile ? 16 : 8}>
+                  <div style={{ padding: isMobile ? "0" : "0 1rem" }}>
+                    <div
+                      style={{
+                        color: "#666",
+                        marginBottom: "0.5rem",
+                        fontSize: "0.9rem",
+                      }}
+                    >
+                      {product.category || "Category1"}
+                    </div>
+
+                    <Header
+                      as="h2"
+                      style={{
+                        margin: "0 0 1rem 0",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {product.name}
+                    </Header>
+
+                    <div
+                      style={{
+                        fontSize: "1.5rem",
+                        fontWeight: "bold",
+                        marginBottom: "1rem",
+                        color: "#333",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      ${product.price.toFixed(2)}
+                      {product.stock === 0 && (
+                        <Label
+                          style={{
+                            marginLeft: "1rem",
+                            backgroundColor: "#ffcccc",
+                            color: "#cc0000",
+                            padding: "0.4rem 0.8rem",
+                          }}
+                        >
+                          Out of Stock
+                        </Label>
+                      )}
+                    </div>
+
+                    <Divider />
+
+                    <div style={{ marginBottom: "2rem" }}>
+                      <p
+                        style={{
+                          lineHeight: "1.6",
+                          color: "#555",
+                        }}
+                      >
+                        {product.description ||
+                          "Hundreds of VR games, one-of-a-kind experiences, live events, new ways to stay fit and a growing community of users. Experience the best of VR with an ever-expanding universe of games and experiences."}
+                      </p>
+                    </div>
+
+                    <div style={{ marginBottom: "2rem" }}>
+                      <p
+                        style={{
+                          lineHeight: "1.6",
+                          color: "#555",
+                        }}
+                      >
+                        stock:{product.stock}
+                      </p>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
+                        gap: "1rem",
+                        marginTop: "1rem",
+                      }}
+                    >
+                      <Button
+                        primary
+                        size="large"
+                        onClick={handleAddCartClick}
+                        disabled={product.stock === 0}
+                        style={{
+                          backgroundColor: "#5829e3",
+                          color: "white",
+                          width: isMobile ? "100%" : "auto",
+                        }}
+                      >
+                        Add To Cart
+                      </Button>
+
+                      {userRole === "admin" && (
+                        <Button
+                          size="large"
+                          onClick={() =>
+                            navigate(`/product/${product._id}/edit`)
+                          }
+                          style={{ width: isMobile ? "100%" : "auto" }}
+                        >
+                          Edit
+                        </Button>
+                      )}
+                    </div>
+
+                    {cartMessage && (
+                      <Message positive style={{ marginTop: "1rem" }}>
+                        {cartMessage}
+                      </Message>
+                    )}
+
+                    {errorMessage && (
+                      <Message negative style={{ marginTop: "1rem" }}>
+                        {errorMessage}
+                      </Message>
+                    )}
+                  </div>
+                </Grid.Column>
+              </Grid.Row>
+            </Grid>
+          </Container>
+        )}
+      </div>
+
       <Footer />
     </div>
   );

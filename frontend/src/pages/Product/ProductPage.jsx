@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Dropdown, Button, Input, Icon } from "semantic-ui-react";
+import { Container, Dropdown, Button, Image, Icon } from "semantic-ui-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import HeaderBar from "../../components/HeaderBar";
@@ -21,7 +21,7 @@ function ProductPage() {
   const [cartMessage, setCartMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const productsPerPage = isMobile ? 1 : 8;
+  const productsPerPage = isMobile ? 3 : 8;
 
   useEffect(() => {
     if (location.state?.products) {
@@ -123,17 +123,16 @@ function ProductPage() {
 
   const handleEdit = (name) => {
     axios
-    .get(`http://localhost:5000/api/products/name/${name}`)
-    .then((res) => {
-      if (res.data.success && res.data.singleProd) {
-        navigate(`/product/${res.data.singleProd._id}/edit`);
-      }
-    })
-    .catch((err) => {
-      console.error("Failed to fetch product for editing:", err);
-    });
+      .get(`http://localhost:5000/api/products/name/${name}`)
+      .then((res) => {
+        if (res.data.success && res.data.singleProd) {
+          navigate(`/product/${res.data.singleProd._id}/edit`);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch product for editing:", err);
+      });
   };
- 
 
   const handleImageClick = (name) => {
     axios
@@ -169,99 +168,318 @@ function ProductPage() {
   const totalPages = Math.ceil(products.length / productsPerPage);
 
   return (
-    <div className="products-page-wrapper">
-    <HeaderBar
-      showSearchBar={true}
-      searchTerm={searchTerm}
-      setSearchTerm={setSearchTerm}
-      handleSearch={handleSearch}
-    />
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
+      <HeaderBar
+        showSearchBar={true}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        handleSearch={handleSearch}
+      />
 
-    <Container fluid className="products-page-container">
-      {/* Header row: Title + Sort dropdown */}
-      <div className="products-header-row d-flex justify-content-between align-items-center mb-4">
-        <h2 className="products-title mb-0">Products</h2>
-        <Dropdown
-          className="products-sort"
-          value={sortOption}
-          onChange={(e, { value }) => setSortOption(value)}
-          options={[
-            { key: "date", text: "Sorted by date", value: "date" },
-            { key: "priceLow", text: "Price: Low to High", value: "priceLow" },
-            { key: "priceHigh", text: "Price: High to Low", value: "priceHigh" },
-          ]}
-        />
-      </div>
-
-      {/* Product Grid */}
-      <div className="product-grid">
-        {paginated.map((product) => (
-          <div className="product-container" key={product._id}>
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="product-image"
-              style={{ cursor: "pointer" }}
-              onClick={() => handleImageClick(product.name)}
-            />
-            <div className="product-info">
-              <div className="product-name">{product.name}</div>
-              <div className="product-price">${product.price}</div>
-          </div>
-            <div className="product-buttons">
-            {userRole && (
-              <Button
-                size="tiny"
-                color="green"
-                onClick={() => handleAddCartClick(product._id, product.name)}
-                disabled={product.stock === 0}
-              >
-              Add
-            </Button>
-              )}
-              {userRole === "admin" && (
-                <>
-                  <Button
-                    size="tiny"
-                    color="yellow"
-                    onClick={() => handleEdit(product.name)}
-                  >
-                    Edit
-                  </Button>
-
-                  <Button
-                    size="tiny"
-                    color="red"
-                    onClick={() => handleDelete(product._id)}
-                  >
-                    Delete
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination aligned to bottom right */}
-      <div className="pagination-bottom-right">
-        {Array.from({ length: totalPages }).map((_, idx) => (
-          <Button
-            key={idx}
-            color={currentPage === idx + 1 ? "blue" : undefined}
-            basic={currentPage !== idx + 1}
-            size="tiny"
-            className="me-2"
-            onClick={() => setCurrentPage(idx + 1)}
+      <Container
+        style={{
+          flex: "1 0 auto",
+          padding: isMobile ? "0.5rem" : "2rem",
+          maxWidth: isMobile ? "100%" : "1200px",
+        }}
+      >
+        {/* Header row: Title + Sort dropdown + button*/}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "space-between",
+            alignItems: isMobile ? "stretch" : "center",
+            marginBottom: "1.5rem",
+            gap: isMobile ? "0.75rem" : 0,
+          }}
+        >
+          <h2 className="products-title mb-0">Products</h2>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "0.75rem",
+            }}
           >
-            {idx + 1}
-          </Button>
-        ))}
-      </div>
-    </Container>
+            <Dropdown
+              selection
+              text={
+                sortOption === "date"
+                  ? "Price: low to high"
+                  : sortOption === "priceLow"
+                  ? "Price: low to high"
+                  : "Price: high to low"
+              }
+              style={{
+                minWidth: isMobile ? "auto" : "180px",
+              }}
+              options={[
+                { key: "date", text: "Last added", value: "date" },
+                {
+                  key: "priceLow",
+                  text: "Price: low to high",
+                  value: "priceLow",
+                },
+                {
+                  key: "priceHigh",
+                  text: "Price: high to low",
+                  value: "priceHigh",
+                },
+              ]}
+              onChange={(e, { value }) => setSortOption(value)}
+            />
+            {userRole === "admin" && (
+              <Button
+                primary
+                content="Add Product"
+                style={{
+                  backgroundColor: "#5829e3",
+                  marginLeft: isMobile ? "0" : "0.75rem",
+                }}
+                onClick={() => navigate("/product/create")}
+              />
+            )}
+          </div>
+        </div>
 
-    <Footer />
-  </div>
+        {isMobile ? (
+          <div>
+            {paginated.map((product) => (
+              <div
+                key={product._id}
+                style={{
+                  marginBottom: "1.5rem",
+                  border: "1px solid #eee",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleImageClick(product.name)}
+                >
+                  <Image
+                    src={
+                      product.imageUrl ||
+                      product.image1 ||
+                      "https://via.placeholder.com/300x300?text=No+Image"
+                    }
+                    fluid
+                    style={{ width: "100%", height: "auto" }}
+                  />
+                </div>
+
+                <div style={{ padding: "1rem" }}>
+                  <div
+                    style={{
+                      color: "#666",
+                      fontSize: "0.9rem",
+                      marginBottom: "0.25rem",
+                    }}
+                  >
+                    {product.name}
+                  </div>
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    ${product.price ? product.price.toFixed(2) : "0.00"}
+                  </div>
+                  '
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    stock:{product.stock}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      {userRole && (
+                        <Button
+                          primary
+                          style={{ backgroundColor: "#5829e3" }}
+                          onClick={() =>
+                            handleAddCartClick(product._id, product.name)
+                          }
+                          disabled={product.stock === 0}
+                        >
+                          Add
+                        </Button>
+                      )}
+                    </div>
+
+                    <div>
+                      <Button
+                        basic
+                        as="a"
+                        href="#"
+                        onClick={() =>
+                          (window.location = `mailto:?subject=Check out this product&body=I found this amazing product: ${product.name}`)
+                        }
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Desktop product grid
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "1.5rem",
+            }}
+          >
+            {paginated.map((product) => (
+              <div
+                key={product._id}
+                style={{
+                  border: "1px solid #eee",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleImageClick(product.name)}
+                >
+                  <Image
+                    src={
+                      product.imageUrl ||
+                      product.image1 ||
+                      "https://via.placeholder.com/300x300?text=No+Image"
+                    }
+                    fluid
+                  />
+                </div>
+
+                <div style={{ padding: "1rem" }}>
+                  <div
+                    style={{
+                      color: "#666",
+                      fontSize: "0.9rem",
+                      marginBottom: "0.25rem",
+                    }}
+                  >
+                    {product.name}
+                  </div>
+
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    ${product.price ? product.price.toFixed(2) : "0.00"}
+                  </div>
+
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "1.1rem",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    stock:{product.stock}
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Button
+                      primary
+                      style={{ backgroundColor: "#5829e3" }}
+                      onClick={() =>
+                        handleAddCartClick(product._id, product.name)
+                      }
+                      disabled={product.stock === 0}
+                    >
+                      Add
+                    </Button>
+
+                    {userRole === "admin" && (
+                      <Button basic onClick={() => handleEdit(product.name)}>
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "2rem",
+            }}
+          >
+            <Button
+              icon="angle left"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              style={{ marginRight: "0.25rem" }}
+            />
+
+            {Array.from({ length: totalPages }).map((_, idx) => (
+              <Button
+                key={idx}
+                style={{
+                  backgroundColor:
+                    currentPage === idx + 1 ? "#5829e3" : "transparent",
+                  color: currentPage === idx + 1 ? "white" : "black",
+                  marginRight: "0.25rem",
+                }}
+                onClick={() => setCurrentPage(idx + 1)}
+              >
+                {idx + 1}
+              </Button>
+            ))}
+
+            <Button
+              icon="angle right"
+              disabled={currentPage === totalPages}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+            />
+          </div>
+        )}
+      </Container>
+
+      <Footer />
+    </div>
   );
 }
 

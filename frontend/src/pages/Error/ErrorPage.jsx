@@ -46,7 +46,7 @@ const ErrorPage = () => {
           padding: "1rem",
         }}
       >
-        <Icon name="exclamation circle" size="huge" color="violet" />
+        <Icon name="exclamation circle" size="huge" color="red" />
         <Header as="h1" style={{ marginTop: "1rem" }}>
           Oops, something went wrong!
         </Header>

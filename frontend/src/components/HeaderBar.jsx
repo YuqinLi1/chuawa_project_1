@@ -37,7 +37,7 @@ function HeaderBar({ showSearchBar }) {
       .catch(() => {
         setUser(null);
       });
-  }, [location.pathname]); 
+  }, [location.pathname]);
 
   // Fetch cart when user changes
   useEffect(() => {
@@ -65,13 +65,12 @@ function HeaderBar({ showSearchBar }) {
     setTotalPrice(total);
   }, [cartItems]);
 
-  // ✅ Allow other components to trigger a cart refresh
+  // trigger a cart refresh
   useEffect(() => {
     const handleRefreshCart = () => fetchCartItems();
     window.addEventListener("refresh-cart", handleRefreshCart);
     return () => window.removeEventListener("refresh-cart", handleRefreshCart);
   }, []);
-
 
   const fetchCartItems = async () => {
     try {
@@ -186,9 +185,10 @@ function HeaderBar({ showSearchBar }) {
         <Menu.Menu position="right">
           {/* User menu item */}
           {!user ? (
-            <Menu.Item 
+            <Menu.Item
               onClick={() => navigate("/login")}
-              style={{ color: "#ccc" }}>
+              style={{ color: "#ccc" }}
+            >
               <Icon name="user" />
               Sign In
             </Menu.Item>
@@ -230,6 +230,7 @@ function HeaderBar({ showSearchBar }) {
           onClose={() => setCartSidebarVisible(false)}
           cartItems={cartItems}
           totalPrice={totalPrice}
+          discount={discount}
           promoCode={promoCode}
           setPromoCode={setPromoCode}
           handleApplyPromo={handleApplyPromo}
