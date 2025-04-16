@@ -211,6 +211,11 @@ function HeaderBar({ showSearchBar }) {
                 {cartItems.length > 0 && (
                   <span className="cart-badge">{cartItems.length}</span>
                 )}
+                {totalPrice >= 0 && (
+                  <span style={{ marginLeft: "0.5rem", fontWeight: "bold" }}>
+                    ${totalPrice.toFixed(2)}
+                  </span>
+                )}
               </Menu.Item>
             </>
           )}

@@ -57,7 +57,7 @@ const userLogin = asyncHandler(async (req, res) => {
 
     const user = emailExists;
     console.log(emailExists);
-    console.log(password +" "+user.password);
+    //(password +" "+user.password);
 
     if (password !== user?.password) {
       throw new Error("Password doesn't match!");

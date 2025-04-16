@@ -239,8 +239,7 @@ function ProductDetailPage() {
                           color: "#555",
                         }}
                       >
-                        {product.description ||
-                          "Hundreds of VR games, one-of-a-kind experiences, live events, new ways to stay fit and a growing community of users. Experience the best of VR with an ever-expanding universe of games and experiences."}
+                        {product.description}
                       </p>
                     </div>
 

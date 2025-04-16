@@ -8,7 +8,7 @@ function UserSidebar({ visible, onHide, user }) {
 
   const handleLogout = async () => {
     await axios.post("http://localhost:5000/api/auth/logout", {}, { withCredentials: true });
-    document.cookie = "token=; Max-Age=0"; // clear token manually
+    document.cookie = "token=; Max-Age=0"; 
     navigate("/login");
   };
 
