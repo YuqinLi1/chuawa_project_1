@@ -3,8 +3,8 @@ const Product = require("../models/productModel");
 const mongoose = require("mongoose");
 
 const getCart = async (req, res) => {
-  console.log("step 10 " + req.body);
-  console.log("step 11 " + req.user);
+  //console.log("step 10 " + req.body);
+  //console.log("step 11 " + req.user);
   try {
     const cart = await Cart.findOne({ user: req.user._id }).populate(
       "items.product",
@@ -27,17 +27,17 @@ const getCart = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
-    console.log("step 1", req.body);
-    console.log("step 2", req.user);
+    //console.log("step 1", req.body);
+    //console.log("step 2", req.user);
 
     // Find or create a cart for the user
     let cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       cart = new Cart({ user: req.user._id, items: [] });
     }
-    console.log("step3 " + cart);
+    //console.log("step3 " + cart);
     // cart.user = req.user._id;
-    console.log("step4 " + cart);
+    //console.log("step4 " + cart);
 
     // Validate the product exists
     const product = await Product.findById(productId);
@@ -47,13 +47,13 @@ const addToCart = async (req, res) => {
         message: "Product not found",
       });
     }
-    console.log("step5 " + product);
+    //console.log("step5 " + product);
 
     // Check if product already in cart
     const itemIndex = cart.items.findIndex(
       (item) => item.product.toString() === productId
     );
-    console.log("step6");
+    //console.log("step6");
 
     if (itemIndex > -1) {
       // Update quantity
@@ -62,16 +62,16 @@ const addToCart = async (req, res) => {
       // Push a new item
       cart.items.push({ product: productId, quantity });
     }
-    console.log("step7");
+   // console.log("step7");
     await cart.save();
 
-    console.log("step8");
+    //console.log("step8");
     // Re-fetch the cart with product details
     const updatedCart = await Cart.findById(cart._id).populate(
       "items.product",
       "name price stock imageUrl"
     );
-    console.log("step9");
+    //console.log("step9");
     res.json({
       success: true,
       message: "Product added to cart",
@@ -92,7 +92,7 @@ const updateCartItem = async (req, res) => {
     const { cartItemId, quantity } = req.body;
 
     console.log("Updating cart item - Item ID:", cartItemId);
-    console.log("New quantity:", quantity);
+    //console.log("New quantity:", quantity);
 
     // Find user's cart
     const cart = await Cart.findOne({ user: req.user._id });
