@@ -1,12 +1,14 @@
 import React from "react";
 import { Container, Header, Button, Icon } from "semantic-ui-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation  } from "react-router-dom";
 import useWindowSize from "../../hooks/useWindowSize";
 import HeaderBar from "../../components/HeaderBar";
 import Footer from "../../components/Footer";
 
 const ErrorPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const errorMessage = location.state?.message || "";
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
@@ -23,8 +25,8 @@ const ErrorPage = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh", // ensures full viewport height
-        margin: 0, // remove default body margin if needed
+        minHeight: "100vh",
+        margin: 0,
       }}
     >
       <HeaderBar
@@ -49,6 +51,11 @@ const ErrorPage = () => {
         <Icon name="exclamation circle" size="huge" color="red" />
         <Header as="h1" style={{ marginTop: "1rem" }}>
           Oops, something went wrong!
+          {errorMessage && (
+            <p style={{ color: "red", marginTop: "1rem", fontSize: "1rem"}}>
+              {errorMessage}
+            </p>
+          )}
         </Header>
         <Button primary onClick={() => navigate("/products")}>
           Go Home

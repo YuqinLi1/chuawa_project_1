@@ -76,16 +76,13 @@ function ProductPage() {
         } else {
           setErrorMessage(
             `Failed to add product to cart: ${
-              err.response.data.message || "Unknown error"
+              err.response.data.message
             }`
           );
         }
-      } else if (err.request) {
-        setErrorMessage("Server not responding. Please try again later.");
       } else {
-        setErrorMessage(`Error: ${err.message}`);
-      }
-
+        setErrorMessage("Server not responding. Please try again later.");
+      } 
       setCartMessage("");
     }
   };

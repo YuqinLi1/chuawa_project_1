@@ -60,7 +60,11 @@ function SignUp() {
       if (error.response && error.response.status === 400) {
         setServerError("User already exists, please login");
       } else {
-        setServerError("Registration failed. Please try again.");
+        navigate("/error", {
+          state: {
+            message: "Registration failed. Please try again later",
+          },
+        });
       }
     }
   };

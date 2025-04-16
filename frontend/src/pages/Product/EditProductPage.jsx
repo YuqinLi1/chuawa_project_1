@@ -57,7 +57,11 @@ function EditProductPage() {
           }
         }
       } catch (error) {
-        console.error("Failed to fetch product for edit:", error);
+        navigate("/error", {
+          state: {
+            message: "Failed to fetch product for edit:"+error,
+          },
+        });
       }
     };
 

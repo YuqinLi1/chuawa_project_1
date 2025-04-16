@@ -64,7 +64,11 @@ function Login() {
           "User not exists or password doesn't match record. Please try again or register."
         );
       } else {
-        setServerError("Internal Service Error: Backend is down");
+        navigate("/error", {
+          state: {
+            message: "Internal Service Error: Backend is down",
+          },
+        });
       }
     }
   };

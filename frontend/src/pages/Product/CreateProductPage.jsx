@@ -75,8 +75,11 @@ function CreateProductPage() {
       alert("Product added successfully!");
       navigate("/products");
     } catch (error) {
-      console.error("Failed to create product:", error);
-      alert("Failed to add product.");
+      navigate("/error", {
+        state: {
+          message: "Failed to create product:"+error,
+        },
+      });
     }
   };
 

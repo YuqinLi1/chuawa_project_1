@@ -50,7 +50,11 @@ function PasswordReset() {
       if (status === 400) {
         setServerError("Email and ID do not match.");
       } else {
-        setServerError("Failed to update password. Please try again.");
+        navigate("/error", {
+          state: {
+            message: "Internal Service Error: Backend is down",
+          },
+        });
       }
     }
   };
