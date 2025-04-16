@@ -56,59 +56,129 @@ function PasswordReset() {
   };
 
   return (
-    <div className="page-container">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
+    >
       <HeaderBar />
 
-      {/* Centered middle layout */}
-      <div className="layout-wrapper">
-        <div className="login-box">
-          <h5 className="text-center mb-3">Please input your email, your ID and new password</h5>
-          
+      <Container
+        style={{
+          flex: "1 0 auto",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: isMobile ? "1rem" : "2rem",
+        }}
+      >
+        <div
+          style={{
+            width: isMobile ? "100%" : "400px",
+            maxWidth: "100%",
+            backgroundColor: "white",
+            borderRadius: "8px",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+            padding: isMobile ? "1.5rem" : "2rem",
+            position: "relative",
+          }}
+        >
+          <h2
+            style={{
+              textAlign: "center",
+              marginBottom: "1.5rem",
+              fontSize: isMobile ? "1.25rem" : "1.5rem",
+            }}
+          >
+            Update your password
+          </h2>
+
           {serverError && (
-            <Message negative className="text-center">
+            <Message negative style={{ marginBottom: "1rem" }}>
               {serverError}
             </Message>
           )}
 
           <Form onSubmit={handleSubmit}>
-             <Form.Field className="mb-2">
-               <Input
-                 type="email"
-                 placeholder="Email"
-                 value={email}
-                 onChange={(e) => setEmail(e.target.value)}
-               />
-             </Form.Field>           
+            <Form.Field style={{ marginBottom: "1rem" }}>
+              <label>Email</label>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                fluid
+                size={isMobile ? "small" : "large"}
+              />
+            </Form.Field>
 
-             <Form.Field className="mb-2">
-               <Input
-                  placeholder="User ID"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-               />
-             </Form.Field>                   
-              
-            <Form.Field className="mb-2 password-input-wrapper">
+            <Form.Field style={{ marginBottom: "1rem" }}>
+              <label>User ID</label>
+              <Input
+                placeholder="Enter your User ID"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                fluid
+                size={isMobile ? "small" : "large"}
+              />
+            </Form.Field>
+
+            <Form.Field
+              style={{
+                marginBottom: "1.5rem",
+                position: "relative",
+              }}
+            >
+              <label>New Password</label>
               <Input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder="Enter your new password"
                 value={newPassword}
                 onChange={(e) => setPassword(e.target.value)}
+                fluid
+                size={isMobile ? "small" : "large"}
+                action={{
+                  content: showPassword ? "Hide" : "Show",
+                  onClick: () => setShowPassword(!showPassword),
+                  style: {
+                    color: "#5829e3",
+                    padding: isMobile ? "0.5rem" : "0.75rem",
+                  },
+                }}
+                actionPosition="right"
               />
-              <span
-                className="show-password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </span>
-              </Form.Field>            
+            </Form.Field>
 
-             <Button type="submit" fluid className="login-button">
-                Update Password
-             </Button>  
+            <Button
+              type="submit"
+              fluid
+              style={{
+                backgroundColor: "#5829e3",
+                color: "white",
+                height: isMobile ? "40px" : "45px",
+                fontSize: isMobile ? "0.9rem" : "1rem",
+              }}
+            >
+              Update Password
+            </Button>
           </Form>
+
+          <div
+            style={{
+              position: "absolute",
+              top: "1rem",
+              right: "1rem",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+            }}
+            onClick={() => navigate(-1)}
+          >
+            ✕
+          </div>
         </div>
-      </div>
+      </Container>
       <Footer />
     </div>
   );
