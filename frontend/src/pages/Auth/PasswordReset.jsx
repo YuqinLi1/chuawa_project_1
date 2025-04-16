@@ -109,6 +109,7 @@ function PasswordReset() {
           </Form>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

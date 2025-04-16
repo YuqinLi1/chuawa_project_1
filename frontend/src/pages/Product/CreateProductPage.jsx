@@ -54,6 +54,11 @@ function CreateProductPage() {
 
   const handleAddProduct = async () => {
     try {
+      const parsedPrice = parseFloat(product.price);
+      if (parsedPrice <= 0) {
+        alert("Price must be greater than 0.");
+        return;
+      }
       const response = await api.post(
         "/products/create",
         {

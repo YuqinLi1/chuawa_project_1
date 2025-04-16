@@ -26,6 +26,7 @@ function PasswordSucceed() {
       </Button>
       </div>
       </div>
+      <Footer />
     </div>
   );
 }

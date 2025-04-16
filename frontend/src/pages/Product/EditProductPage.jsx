@@ -39,6 +39,31 @@ function EditProductPage() {
     { key: "other", text: "Other", value: "other" },
   ];
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await api.get(`/products/${id}`);
+        if (res.data?.success && res.data.singleProd) {
+          setProduct({
+            name: res.data.singleProd.name || "",
+            description: res.data.singleProd.description || "",
+            category: res.data.singleProd.category || "",
+            price: res.data.singleProd.price?.toString() || "",
+            stock: res.data.singleProd.stock?.toString() || "",
+            imageUrl: res.data.singleProd.imageUrl || "",
+          });
+          if (res.data.singleProd.imageUrl?.startsWith("http")) {
+            setPreviewUrl(res.data.singleProd.imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch product for edit:", error);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
   const handleChange = (e, { name, value }) => {
     setProduct({ ...product, [name]: value });
   };
@@ -57,6 +82,11 @@ function EditProductPage() {
       Object.keys(product).forEach((key) => {
         if (product[key]) {
           if (key === "price") {
+            const parsedPrice = parseFloat(product[key]);
+            if (parsedPrice <= 0) {
+              alert("Price must be greater than 0.");
+              throw new Error("Invalid price");
+            }
             updateFields[key] = parseFloat(product[key]);
           } else if (key === "stock") {
             updateFields[key] = parseInt(product[key]);
