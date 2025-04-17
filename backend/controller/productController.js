@@ -1,42 +1,61 @@
 const express = require("express");
 const asyncHandler = require("express-async-handler");
-const Product = require("../../model/productModel.js");
+const Product = require("../models/productModel.js");
 const mongoose = require("mongoose");
 
 //create product
 const createProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, stock, category, image1 } = req?.body;
+  const { name, price, description, stock, category, imageUrl} = req.body;
+
   try {
-    // create product
     const newProduct = await Product.create({
       name,
       price,
       description,
       stock,
       category,
-      image1,
+      imageUrl,
     });
 
-    res.status(201).json(newProduct);
+    res.status(200).json({
+      success: true,
+      product: newProduct,
+    });
   } catch (error) {
-    res.status(401).json({
+    res.status(400).json({
       success: false,
       message: error.message,
     });
   }
 });
 
-//fetch all products
+//fetch all products /products?sortField=price&sortOrder=desc
 const fetchAllProducts = asyncHandler(async (req, res) => {
   try {
-    const allProducts = await User.find({})
-      .populate("user")
-      .sort({ createdAt: -1 });
+    const { sortField, sortOrder, search } = req.query;
+
+    let sortOption = {};
+    if (sortField) {
+      if (sortField === "lastAdded") {
+        sortOption.createdAt = -1;
+      } else {
+        sortOption[sortField] = sortOrder === "asc" ? 1 : -1;
+      }
+    }
+
+    let query = {};
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+
+    const allProducts = await Product.find(query).sort(sortOption);
+
     res.status(200).json({
+      success: true,
       allProducts,
     });
   } catch (error) {
-    res.status(401).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -46,11 +65,70 @@ const fetchAllProducts = asyncHandler(async (req, res) => {
 //fetch single product
 const fetchSingleProd = asyncHandler(async (req, res) => {
   const { id } = req?.params;
+  console.log("input id "+id);
   try {
-    const singleProd = await Product.findById(id).populate("user");
-    res.status(200).json(singleProd);
+    const singleProd = await Product.findById(id);
+
+    console.log(singleProd);
+    //  check if product exists
+    if (!singleProd) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      singleProd,
+    });
   } catch (error) {
     res.status(401).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+const searchProduct = asyncHandler(async (req, res) => {
+  const keyword = req.params.keyword?.trim().toLowerCase();
+
+  let query = {};
+  if (keyword && keyword !== "" && keyword !== "all") {
+    query = {
+      $or: [
+        { name: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ],
+    };
+  }
+
+  try {
+    const products = await Product.find(query);
+    res.status(200).json({ success: true, products });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+const fetchProductByName = asyncHandler(async (req, res) => {
+  const { name } = req.params;
+  try {
+    const singleProd = await Product.findOne({ name: { $regex: new RegExp(name, "i") } });
+    if (!singleProd) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      singleProd,
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -62,16 +140,17 @@ const updateProduct = asyncHandler(async (req, res) => {
   const { id } = req?.params;
   try {
     const user = req?.user;
-    const updateProd = await Product.findByIdAndUpdate(
-      id,
-      {
-        ...req.body,
-        user: user?._id,
-      },
-      { new: true }
-    );
-
-    const updatedProd = await Product.findById(id).populate("user");
+    const updateData = {
+      ...req.body,
+      user: user ? user._id : undefined,
+    };
+    // if file exists
+    if (req.file) {
+      updateData.imageUrl = req.file.path;
+    }
+    const updatedProd = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
     res.status(200).json(updatedProd);
   } catch (error) {
     res.status(401).json({
@@ -104,4 +183,6 @@ module.exports = {
   fetchSingleProd,
   updateProduct,
   deleteProduct,
+  searchProduct,
+  fetchProductByName,
 };

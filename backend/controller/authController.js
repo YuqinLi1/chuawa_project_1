@@ -1,48 +1,44 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
-const User = require("../../model/UserModel.js");
+const User = require("../models/userModel.js");
 const mongoose = require("mongoose");
-const crypto = require("crypto");
-
 const expiryDate = new Date();
 const date1 = expiryDate.setTime(expiryDate.getTime() + 12);
+const nodemailer = require('nodemailer')
 
 //register user
 const registerUser = asyncHandler(async (req, res) => {
-  const { email, password, role } = req?.body;
+  const { email, password, role } = req.body;
+
   try {
-    const user = await User.findOne({ email: email });
-    if (user) {
-      throw new Error("User Already exists! Please Login.");
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: "User already exists, please login.",
+      });
     }
-    const salt = await bcrypt.genSalt(10);
-    const encryptedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
-      email: email,
-      password: encryptedPassword,
+      email,
+      password,
       role: role || "user",
     });
 
-    //set cookie token
-    const data = {
-      id: newUser?._id,
-    };
-    const token = jwt.sign(data, process.env.APP_JWT_SECRET_KEY, {
+    const token = jwt.sign({ id: newUser._id }, process.env.APP_JWT_SECRET_KEY, {
       expiresIn: "12h",
     });
 
-    const createdUser = newUser;
-    createdUser.password = undefined;
-
     res
-      .status(201)
-      .cookie("token", token, { expires: new Date(Date.now() + date1) })
-      .json({ success: true, token, createdUser });
+      .status(200)
+      .cookie("token", token, {
+        httpOnly: true,
+        maxAge: 12 * 60 * 60 * 1000,
+      })
+      .json({ success: true, token, user: { email: newUser.email, role: newUser.role } });
   } catch (error) {
-    res.status(401).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -54,17 +50,17 @@ const userLogin = asyncHandler(async (req, res) => {
   const { email, password } = req?.body;
 
   try {
-    const emailExists = await User.findOne({ email: email }).populate("saved");
-
+    const emailExists = await User.findOne({ email: email });
     if (!emailExists) {
       throw new Error("User Does not exist! Please Register.");
     }
 
-    const user = await User.findOne({ email: email });
-    const comparePassword = await bcrypt.compare(password, user?.password);
+    const user = emailExists;
+    console.log(emailExists);
+    //(password +" "+user.password);
 
-    if (!comparePassword) {
-      throw new Error("Password Dosent Match!");
+    if (password !== user?.password) {
+      throw new Error("Password doesn't match!");
     }
 
     const data = {
@@ -82,8 +78,6 @@ const userLogin = asyncHandler(async (req, res) => {
       .status(200)
       .cookie("token", token, {
         expires: new Date(Date.now() + date1),
-        sameSite: "None",
-        secure: true,
       })
       .json({
         success: true,
@@ -98,94 +92,25 @@ const userLogin = asyncHandler(async (req, res) => {
   }
 });
 
-//user details
-const userDetails = asyncHandler(async (req, res) => {
-  const id = req?.user?._id;
-  try {
-    const user = await User.findById(id).select("-password").populate("saved");
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
-//fetch all users
-const fetchAllUsers = asyncHandler(async (req, res) => {
-  try {
-    const user = await User.find();
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
-    });
-  }
-});
-
 //user change password controller/logic
 const userPasswordUpdate = asyncHandler(async (req, res) => {
-  const { password } = req?.body;
-  const id = req?.user?._id;
+  const { userId, email, newPassword } = req.body;
 
-  try {
-    const user = await User.findById(id);
-
-    const comparePassword = await bcrypt.compare(password, user?.password);
-    if (comparePassword) {
-      throw new Error("Please enter a different password from your own.");
-    } else {
-      const salt = await bcrypt.genSalt(10);
-      const encryptedPassword = await bcrypt.hash(password, salt);
-
-      user.password = encryptedPassword;
-
-      const updatedUser1 = await user.save();
-
-      const updatedUser = await User.findById(id).select("-password");
-
-      res.status(201).json({
-        updatedUser,
-      });
-    }
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
-    });
+  if (!userId || !email || !newPassword) {
+    return res.status(400).json({ message: "Missing fields." });
   }
-});
 
-//update user field logic
-const updateUserField = asyncHandler(async (req, res) => {
-  const id = req?.user?._id;
+  const user = await User.findById(userId);
+  //console.log("step1 "+user);
 
-  try {
-    const user = await User.findByIdAndUpdate(id, { ...req?.body }).select(
-      "-pasword"
-    );
-
-    if (!user) throw new Error("No user Found!");
-
-    const updatedUser = await User.findById(id)
-      .populate("saved")
-      .select("-password");
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message,
-    });
+  if (!user || user.email !== email) {
+    return res.status(400).json({ message: "Invalid user ID or email mismatch." });
   }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({ message: "Password updated successfully." });
 });
 
 //save a product logic
@@ -256,13 +181,24 @@ const unSaveProduct = asyncHandler(async (req, res) => {
   }
 });
 
+const getMe = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password");
+  res.status(200).json({ user });
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+  res
+    .clearCookie("token", { httpOnly: true, sameSite: "None", secure: true })
+    .status(200)
+    .json({ message: "Logged out successfully" });
+});
+
 module.exports = {
   registerUser,
   userLogin,
-  userDetails,
-  fetchAllUsers,
   userPasswordUpdate,
-  updateUserField,
   saveProduct,
   unSaveProduct,
+  getMe,
+  logoutUser,
 };
